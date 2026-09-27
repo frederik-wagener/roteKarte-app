@@ -23,6 +23,16 @@ iOS-App für Kinder: gelbe und rote Karten für den Tag, gute Taten streichen ge
 
 Neue Dateien in `RoteKarte/` oder Einstellungsänderungen: in `project.yml` pflegen und `xcodegen generate` ausführen.
 
+## Web-App (ohne Mac, ohne App Store)
+
+Die klickbare Vorschau (`preview/index.html`) läuft auch als eigenständige Web-App:
+offline-fähig, mit eigenem Symbol auf dem Home-Bildschirm, Daten nur auf dem Gerät.
+
+- Veröffentlicht wird sie per GitHub Pages bei jedem Push auf `main` (`.github/workflows/pages.yml`).
+- Adresse: https://frederik-wagener.github.io/roteKarte-app/
+- Auf dem iPhone in Safari öffnen → *Teilen* → *Zum Home-Bildschirm*.
+- Lokal bauen: `bash scripts/build-web.sh` (Ergebnis in `_site/`).
+
 ## Tests der Spielregeln
 
 ```sh
