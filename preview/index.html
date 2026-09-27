@@ -164,7 +164,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
 .animate-loss .drip { transition: opacity 0.4s ease 1.4s; }
 .animate-loss .drip.d1 { animation: drip 1.6s ease-in 1.5s both; }
 .animate-loss .drip.d2 { animation: drip 1.8s ease-in 1.8s both; }
-.animate-loss .goal-group { animation: shake 0.5s ease 0.9s; }
+.animate-loss .goal-shake { animation: shake 0.5s ease 0.9s; }
 
 .overflow-badge rect { fill: var(--yellow); }
 .red-slot { opacity: 0; transition: opacity 0.15s; }
@@ -739,7 +739,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     svgEl("rect", { x: -15, y: -20, width: 30, height: 40, rx: 5 }, redInner);
     svgEl("text", { x: 0, y: 1, id: "red-count" }, redInner);
     const gp = base.getPointAtLength(goalLen);
-    const goal = svgEl("g", { class: "goal-group", id: "goal", transform: `translate(${gp.x} ${gp.y})` }, road);
+    const goalOuter = svgEl("g", { class: "goal-group", id: "goal", transform: `translate(${gp.x} ${gp.y})` }, road);
+    // Eigene Gruppe fürs Wackeln: eine CSS-Animation auf #goal würde dessen Position (transform-Attribut) überschreiben.
+    const goal = svgEl("g", { class: "goal-shake" }, goalOuter);
     svgEl("circle", { r: 36, class: "goal-ring" }, goal);
     svgEl("circle", { r: 29, class: "goal-plate" }, goal);
     const wob = svgEl("g", { class: "goal-wobble" }, goal);
