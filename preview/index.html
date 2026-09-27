@@ -1,0 +1,1377 @@
+<title>Rote Karte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+:root {
+  --bg: #EAF1E7;
+  --surface: #FFFFFF;
+  --surface-2: #F3F7F1;
+  --ink: #17281D;
+  --ink-2: #53665A;
+  --line: #D3DECF;
+  --pitch: #2F8C50;
+  --pitch-2: #297D47;
+  --chalk: #F8FBF5;
+  --chalk-dim: rgba(248, 251, 245, 0.5);
+  --yellow: #FFCB2E;
+  --yellow-ink: #3B2D00;
+  --red: #E0363C;
+  --red-ink: #FFFFFF;
+  --good: #16935F;
+  --good-ink: #FFFFFF;
+  --star: #FFB300;
+  --backdrop: rgba(12, 24, 16, 0.45);
+  --shadow: 0 1px 2px rgba(18, 40, 26, 0.08), 0 10px 28px rgba(18, 40, 26, 0.10);
+  --radius: 18px;
+  --font-display: "Baloo 2", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0D1510;
+    --surface: #152019;
+    --surface-2: #1B2920;
+    --ink: #E6F0E8;
+    --ink-2: #9DB1A3;
+    --line: #29392F;
+    --pitch: #1E6639;
+    --pitch-2: #1A5B32;
+    --chalk: #EEF5EC;
+    --chalk-dim: rgba(238, 245, 236, 0.42);
+    --backdrop: rgba(0, 0, 0, 0.6);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0D1510;
+  --surface: #152019;
+  --surface-2: #1B2920;
+  --ink: #E6F0E8;
+  --ink-2: #9DB1A3;
+  --line: #29392F;
+  --pitch: #1E6639;
+  --pitch-2: #1A5B32;
+  --chalk: #EEF5EC;
+  --chalk-dim: rgba(238, 245, 236, 0.42);
+  --backdrop: rgba(0, 0, 0, 0.6);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outline-offset: 2px; }
+
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 12px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Kopfzeile */
+.topbar { display: flex; align-items: center; gap: 8px; }
+.kids { display: flex; gap: 8px; overflow-x: auto; flex: 1; scrollbar-width: none; padding-block: 2px; }
+.kids::-webkit-scrollbar { display: none; }
+.kid-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 2px solid var(--line); background: var(--surface);
+  border-radius: 999px; padding: 4px 12px 4px 5px;
+  font-weight: 700; white-space: nowrap;
+}
+.kid-chip .av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; background: var(--surface-2); }
+.kid-chip[aria-pressed="true"] { border-color: var(--kid, var(--pitch)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--kid, var(--pitch)) 25%, transparent); }
+.kid-chip.add { padding: 4px 12px; color: var(--ink-2); }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 0; background: var(--surface); box-shadow: var(--shadow);
+  display: grid; place-items: center; font-size: 20px; flex: none;
+}
+
+.parent-pill {
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; border-radius: 999px; padding: 4px 12px;
+  background: var(--ink); color: var(--bg);
+  font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+.parent-pill[hidden] { display: none; }
+.demo-banner {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 2px dashed var(--line); border-radius: var(--radius);
+  padding: 10px 12px 10px 14px; font-size: 14px; color: var(--ink-2);
+}
+.demo-banner strong { color: var(--ink); }
+
+/* Spielfeld mit Roadmap */
+.pitch {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(100deg, var(--pitch) 0 44px, var(--pitch-2) 44px 88px);
+  box-shadow: var(--shadow);
+  aspect-ratio: 340 / 270;
+  max-width: 100%;
+}
+.pitch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pitch-label {
+  position: absolute; left: 14px; top: 10px;
+  font-family: var(--font-display); font-weight: 700; font-size: 14px;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk-dim);
+}
+.star-bank {
+  position: absolute; right: 12px; bottom: 10px;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(0, 0, 0, 0.18); color: var(--chalk);
+  border-radius: 999px; padding: 2px 10px 2px 8px;
+  font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.star-bank.bump { animation: bump 0.5s ease; }
+
+.road-base { fill: none; stroke: var(--chalk-dim); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 2 11; }
+.road-progress { fill: none; stroke: var(--chalk); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.7s cubic-bezier(.4, 0, .2, 1); }
+.pitch.lost .road-progress { stroke: color-mix(in srgb, var(--chalk) 70%, var(--red)); }
+.start-dot { fill: var(--chalk); }
+.start-label, .goal-caption { fill: var(--chalk); font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.station rect { fill: rgba(0, 0, 0, 0.12); stroke: var(--chalk); stroke-width: 2.2; stroke-dasharray: 5 4; transition: fill 0.2s; }
+.station text { fill: var(--chalk); font-family: var(--font-display); font-weight: 800; font-size: 15px; text-anchor: middle; dominant-baseline: central; }
+.station.filled rect { fill: var(--yellow); stroke: rgba(0, 0, 0, 0.18); stroke-dasharray: none; }
+.station.filled text { fill: var(--yellow-ink); }
+.station-inner { transform-box: fill-box; transform-origin: center; }
+.station.pop .station-inner { animation: pop 0.45s cubic-bezier(.3, 1.6, .5, 1); }
+
+.goal-plate { fill: var(--chalk); }
+.goal-ring { fill: none; stroke: var(--chalk); stroke-width: 2; stroke-dasharray: 3 5; opacity: 0.7; }
+.goal-emoji { font-size: 36px; text-anchor: middle; dominant-baseline: central; transform-box: fill-box; transform-origin: 50% 90%; }
+.goal-wobble { transform-box: fill-box; transform-origin: 50% 90%; animation: wobble 2.4s ease-in-out infinite; }
+.goal-strike { stroke: var(--red); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 80; stroke-dashoffset: 80; }
+.lost .goal-wobble { animation: none; }
+.lost .goal-strike { stroke-dashoffset: 0; }
+.lost .goal-emoji { opacity: 0.55; }
+.lost.melt .goal-emoji { transform: scale(1.08, 0.72) translateY(5px); }
+.lost .drip { opacity: 1; }
+.drip { fill: #F6D7E3; opacity: 0; }
+.animate-loss .goal-strike { transition: stroke-dashoffset 0.55s cubic-bezier(.6, 0, .3, 1) 0.35s; }
+.animate-loss .goal-emoji { transition: transform 1.2s ease 0.9s, opacity 1s ease 0.9s; }
+.animate-loss .drip { transition: opacity 0.4s ease 1.4s; }
+.animate-loss .drip.d1 { animation: drip 1.6s ease-in 1.5s both; }
+.animate-loss .drip.d2 { animation: drip 1.8s ease-in 1.8s both; }
+.animate-loss .goal-group { animation: shake 0.5s ease 0.9s; }
+
+.overflow-badge rect { fill: var(--yellow); }
+.overflow-badge text { fill: var(--yellow-ink); font-weight: 800; font-size: 12px; text-anchor: middle; dominant-baseline: central; }
+
+.runner { transition: transform 0.65s cubic-bezier(.3, 1.3, .5, 1); }
+.runner-body { transform-box: fill-box; transform-origin: 50% 100%; }
+.runner.hop .runner-body { animation: hop 0.65s ease; }
+.runner-plate { fill: var(--surface); stroke: var(--kid, var(--chalk)); stroke-width: 3; }
+.runner-emoji { font-size: 19px; text-anchor: middle; dominant-baseline: central; }
+
+/* Status */
+.status {
+  margin: 0; text-align: center; text-wrap: balance;
+  font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.2;
+  min-height: 2.4em; display: grid; place-items: center;
+}
+.status.warn { color: color-mix(in srgb, var(--ink) 60%, #C98A00); }
+.status.lost { color: var(--red); }
+
+/* Aktionen */
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.act {
+  position: relative;
+  border: 0; border-radius: var(--radius);
+  min-height: 64px; padding: 10px 14px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(16px, 4.6vw, 19px);
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s;
+}
+.act:active { transform: scale(0.97); }
+.act.yellow { background: var(--yellow); color: var(--yellow-ink); }
+.act.red { background: var(--red); color: var(--red-ink); }
+.act.good { grid-column: 1 / -1; background: var(--good); color: var(--good-ink); }
+.act .mini-card { width: 18px; height: 25px; border-radius: 3px; background: currentColor; opacity: 0.9; transform: rotate(-8deg); }
+.act.yellow .mini-card { background: var(--yellow-ink); opacity: 0.85; }
+.act .lock { position: absolute; right: 10px; top: 8px; font-size: 13px; opacity: 0.8; }
+
+/* Tagesverlauf */
+.log h2, .sheet h2, .sheet h3 { font-family: var(--font-display); margin: 0; line-height: 1.2; }
+.log h2 { font-size: 20px; margin-bottom: 8px; }
+.log ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.entry {
+  display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center;
+  background: var(--surface); border-radius: 14px; padding: 10px 12px;
+}
+.entry .kind { width: 22px; height: 30px; border-radius: 4px; justify-self: center; }
+.entry .kind.yellow { background: var(--yellow); }
+.entry .kind.red { background: var(--red); }
+.entry .kind.good { background: none; font-size: 22px; line-height: 30px; text-align: center; width: auto; }
+.entry .what { font-weight: 700; }
+.entry .why { color: var(--ink-2); font-size: 14px; }
+.entry.struck .what { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--ink-2); }
+.entry time { color: var(--ink-2); font-size: 14px; font-variant-numeric: tabular-nums; }
+.empty { color: var(--ink-2); background: var(--surface); border-radius: 14px; padding: 14px; }
+
+/* Effekt-Ebene */
+.fx { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
+.fly { position: absolute; left: 0; top: 0; will-change: transform; }
+.fly-card {
+  width: 78px; height: 108px; border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 40px;
+  backface-visibility: hidden;
+}
+.fly-card.yellow { background: var(--yellow); color: var(--yellow-ink); }
+.fly-card.red { background: var(--red); color: var(--red-ink); }
+.fly-star { font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 10px rgba(255, 179, 0, 0.6)); }
+.fly-fall { width: 30px; height: 40px; border-radius: 5px; background: var(--yellow); }
+.spark { position: absolute; left: 0; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--star); }
+.flash { position: absolute; inset: 0; background: var(--red); opacity: 0; }
+
+/* Sheets */
+.sheet-root { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.sheet-backdrop { position: absolute; inset: 0; background: var(--backdrop); animation: fade 0.2s ease; }
+.sheet {
+  position: relative; width: 100%; max-width: 560px; max-height: 92%;
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--bg); color: var(--ink);
+  border-radius: 26px 26px 0 0;
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 16px;
+  animation: slide-up 0.28s cubic-bezier(.2, .9, .3, 1);
+}
+.sheet.tall { min-height: 80%; }
+.grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--line); align-self: center; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sheet h2 { font-size: 24px; text-wrap: balance; }
+.sheet h3 { font-size: 16px; color: var(--ink-2); letter-spacing: 0.04em; text-transform: uppercase; }
+.sheet p { margin: 0; }
+.sheet .muted { color: var(--ink-2); font-size: 14px; }
+.close-btn { border: 0; background: var(--surface); width: 36px; height: 36px; border-radius: 50%; font-size: 18px; flex: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 6px 14px; font-weight: 700; font-size: 15px;
+}
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 700; font-size: 14px; color: var(--ink-2); }
+.input {
+  width: 100%; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 14px; padding: 12px 14px; font: inherit;
+}
+.row { display: flex; gap: 12px; }
+.row > * { flex: 1; }
+.btn {
+  border: 0; border-radius: 16px; min-height: 54px; padding: 10px 16px;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px;
+  background: var(--surface); color: var(--ink);
+}
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.yellow { background: var(--yellow); color: var(--yellow-ink); }
+.btn.red { background: var(--red); color: var(--red-ink); }
+.btn.good { background: var(--good); color: var(--good-ink); }
+.btn.danger { background: transparent; color: var(--red); border: 2px solid var(--red); }
+.btn:disabled { opacity: 0.4; }
+.btn.small { min-height: 40px; font-size: 15px; padding: 6px 12px; border-radius: 12px; }
+.link-btn { border: 0; background: none; color: var(--ink-2); text-decoration: underline; padding: 6px; font-size: 14px; }
+
+.card-hero { display: flex; justify-content: center; padding-block: 4px; }
+.card-hero .big-card { width: 74px; height: 102px; border-radius: 10px; transform: rotate(-6deg); box-shadow: var(--shadow); }
+.big-card.yellow { background: var(--yellow); }
+.big-card.red { background: var(--red); }
+.card-hero .big-star { font-size: 64px; line-height: 1; }
+.note { background: var(--surface); border-radius: 14px; padding: 12px 14px; font-size: 15px; }
+
+.emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.emoji-opt {
+  aspect-ratio: 1; border: 2px solid var(--line); background: var(--surface); border-radius: 14px;
+  font-size: 24px; display: grid; place-items: center; padding: 0;
+}
+.emoji-opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; }
+.color-opt { aspect-ratio: 1; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line); padding: 0; }
+.color-opt[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.reward-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.reward-opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 14px;
+  padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-weight: 700; font-size: 13px; text-align: center; line-height: 1.2;
+}
+.reward-opt span { font-size: 28px; }
+.reward-opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; }
+
+/* PIN */
+.pin-dots { display: flex; justify-content: center; gap: 16px; padding-block: 8px; }
+.pin-dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); }
+.pin-dots i.on { background: var(--ink); }
+.pin-dots.error { animation: shake 0.4s; }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; margin: 0 auto; width: 100%; }
+.pin-key {
+  border: 0; background: var(--surface); border-radius: 50%; aspect-ratio: 1;
+  font-family: var(--font-display); font-size: 28px; font-weight: 700;
+  box-shadow: var(--shadow);
+}
+.pin-key.ghost { background: none; box-shadow: none; font-size: 22px; }
+.pin-msg { text-align: center; min-height: 1.4em; color: var(--red); font-weight: 700; font-size: 14px; }
+
+/* Einstellungen */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.list-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border-radius: 14px; padding: 10px 12px;
+}
+.list-item .grow { flex: 1; min-width: 0; }
+.list-item .title { font-weight: 800; }
+.list-item .sub { color: var(--ink-2); font-size: 14px; }
+.stepper { display: inline-flex; align-items: center; gap: 12px; }
+.stepper button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); font-size: 20px; font-weight: 800; }
+.stepper output { font-family: var(--font-display); font-size: 24px; font-weight: 800; min-width: 1.5ch; text-align: center; font-variant-numeric: tabular-nums; }
+.switch { width: 54px; height: 32px; border-radius: 999px; border: 0; background: var(--line); position: relative; padding: 0; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--surface); transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.switch[aria-checked="true"] { background: var(--good); }
+.switch[aria-checked="true"]::after { transform: translateX(22px); }
+
+/* Kalender */
+.cal-head { display: flex; align-items: center; justify-content: space-between; }
+.cal-head strong { font-family: var(--font-display); font-size: 20px; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cal .dow { text-align: center; font-size: 12px; font-weight: 800; color: var(--ink-2); letter-spacing: 0.04em; }
+.cal-day {
+  aspect-ratio: 1; border: 0; border-radius: 12px; background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  font-size: 11px; font-weight: 700; color: var(--ink-2); padding: 0; position: relative;
+  font-variant-numeric: tabular-nums;
+}
+.cal-day .sym { font-size: 20px; line-height: 1.1; position: relative; }
+.cal-day.lost .sym { opacity: 0.45; }
+.cal-day.lost .sym::after { content: ""; position: absolute; left: -3px; right: -3px; top: 50%; height: 3px; background: var(--red); border-radius: 2px; transform: rotate(-35deg); }
+.cal-day.today { box-shadow: 0 0 0 2px var(--ink) inset; }
+.cal-day.blank { background: transparent; }
+.cal-day[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { background: var(--surface); border-radius: 14px; padding: 12px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--ink-2); font-size: 13px; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 45;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ink); color: var(--bg);
+  border-radius: 16px; padding: 10px 10px 10px 16px;
+  font-weight: 700; font-size: 15px; box-shadow: var(--shadow);
+  width: max-content; max-width: calc(100% - 32px);
+  animation: slide-up 0.25s ease;
+}
+.toast button { border: 0; border-radius: 10px; padding: 8px 12px; background: var(--bg); color: var(--ink); font-weight: 800; }
+
+@keyframes pop { 0% { transform: scale(0.4); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-14px); } }
+@keyframes wobble { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes drip { 0% { transform: translateY(0); } 100% { transform: translateY(26px); opacity: 0; } }
+@keyframes bump { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes slide-up { from { transform: translateY(40px); opacity: 0; } }
+.toast { animation-name: toast-in; }
+@keyframes toast-in { from { transform: translate(-50%, 30px); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="kids" id="kids" role="group" aria-label="Kind auswählen"></div>
+    <button class="icon-btn" id="btn-history" aria-label="Verlauf">📅</button>
+    <button class="icon-btn" id="btn-settings" aria-label="Einstellungen">⚙️</button>
+  </header>
+
+  <button class="parent-pill" id="parent-pill" hidden></button>
+
+  <div class="demo-banner" id="demo-banner" hidden>
+    <span><strong>Beispiel-Tag.</strong> Probier alles aus – gespeichert wird erst, wenn ihr euer Kind anlegt.</span>
+    <button class="btn small primary" id="btn-start">Loslegen</button>
+  </div>
+
+  <section class="pitch" id="pitch" aria-label="Weg zur Belohnung">
+    <svg id="road" viewBox="0 0 340 270" aria-hidden="true"></svg>
+    <span class="pitch-label" id="pitch-label">Heute</span>
+    <span class="star-bank" id="star-bank" title="Gute Taten heute">⭐ <span id="star-count">0</span></span>
+  </section>
+
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <div class="actions">
+    <button class="act yellow" id="btn-yellow"><span class="mini-card"></span>Gelbe Karte<span class="lock" aria-hidden="true"></span></button>
+    <button class="act red" id="btn-red"><span class="mini-card"></span>Rote Karte<span class="lock" aria-hidden="true"></span></button>
+    <button class="act good" id="btn-good">⭐ <span id="good-label">Gute Tat</span><span class="lock" aria-hidden="true"></span></button>
+  </div>
+
+  <section class="log" aria-labelledby="log-title">
+    <h2 id="log-title">Heute</h2>
+    <ol id="log"></ol>
+  </section>
+</div>
+
+<div class="fx" id="fx"></div>
+<div id="sheet-host"></div>
+<div id="toast-host"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Konstanten ----------
+  const AVATARS = ["👧", "🧒", "👦", "👶", "🧑", "🦁", "🐻", "🦊", "🐼", "🐸", "🦄", "🐯"];
+  const COLORS = ["#FF8A3D", "#3D8BFF", "#B05CFF", "#FF5C8A", "#2BB673", "#E0A800"];
+  const REWARDS = [
+    { emoji: "🍦", name: "Eis" },
+    { emoji: "📺", name: "Fernsehen" },
+    { emoji: "🍫", name: "Süßes" },
+    { emoji: "🎮", name: "Spielzeit" },
+    { emoji: "📖", name: "Gute-Nacht-Geschichte" },
+    { emoji: "🛝", name: "Spielplatz" },
+  ];
+  const REASONS_BAD = ["Hauen", "Nicht zuhören", "Schreien", "Frech sein", "Streiten", "Lügen"];
+  const REASONS_GOOD = ["Aufgeräumt", "Geteilt", "Geholfen", "Lieb gewesen", "Tapfer", "Getröstet"];
+  const UNLOCK_MS = 60_000;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+  // ---------- Hilfsfunktionen ----------
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const pad = (n) => String(n).padStart(2, "0");
+  const dateStr = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const todayStr = () => dateStr(new Date());
+  const dayKey = (childId, date) => `${childId}__${date}`;
+  const timeStr = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const parseDate = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
+  // ---------- Spielregeln (Spiegel der Swift-RuleEngine) ----------
+  function evaluate(events, limit) {
+    const ordered = events
+      .map((e, i) => [e, i])
+      .sort((a, b) => a[0].ts - b[0].ts || a[1] - b[1])
+      .map((x) => x[0]);
+    const active = [];
+    const outcomes = {};
+    let loss = null;
+    let lostBy = null;
+    for (const e of ordered) {
+      if (e.kind === "yellow") {
+        active.push(e.id);
+        outcomes[e.id] = { t: "active" };
+        if (!loss && active.length >= limit) { loss = "yellow"; lostBy = e.id; }
+      } else if (e.kind === "red") {
+        outcomes[e.id] = { t: "red" };
+        if (!loss) { loss = "red"; lostBy = e.id; }
+      } else {
+        if (!loss && active.length) {
+          const y = active.pop();
+          outcomes[y] = { t: "struck", by: e.id };
+          outcomes[e.id] = { t: "goodStruck", yellow: y };
+        } else {
+          outcomes[e.id] = { t: "goodRemembered" };
+        }
+      }
+    }
+    const stars = ordered.filter((e) => e.kind === "good").length;
+    return {
+      limit, ordered, active, outcomes, loss, lostBy, stars,
+      filled: Math.min(active.length, limit),
+      overflow: Math.max(0, active.length - limit),
+      remaining: loss ? 0 : limit - active.length,
+    };
+  }
+
+  function statusText(st, reward) {
+    if (st.loss === "red") return `Rote Karte! ${reward} ist für heute gestrichen.`;
+    if (st.loss === "yellow") return `${st.limit} gelbe Karten – ${reward} ist für heute gestrichen.`;
+    if (st.remaining === st.limit) return `Super! Heute gibt es ${reward}.`;
+    if (st.remaining === 1) return `Achtung! Noch 1 gelbe Karte, dann ist ${reward} gestrichen.`;
+    return `Noch ${st.remaining} gelbe Karten, dann ist ${reward} gestrichen.`;
+  }
+
+  // ---------- Daten ----------
+  const data = { children: {}, settings: { yellowLimit: 4, sound: true, pinHash: null }, days: {} };
+  let demo = null; // Beispiel-Daten, solange noch kein Kind angelegt ist
+  let storeMode = "memory"; // "db" | "local" | "memory"
+  let db = null;
+  const writeChains = {};
+
+  function makeDemo() {
+    const now = Date.now();
+    const h = 3600_000;
+    const created = addDays(new Date(), -12).getTime();
+    const child = { id: "demo", name: "Mia", avatar: "👧", color: "#FF8A3D", rewardName: "Eis", rewardEmoji: "🍦", createdAt: created };
+    const days = {};
+    days[dayKey("demo", todayStr())] = {
+      childId: "demo", date: todayStr(), events: [
+        { id: "d1", kind: "yellow", ts: now - 5 * h, reason: "Nicht zuhören" },
+        { id: "d2", kind: "yellow", ts: now - 4 * h, reason: "Streiten" },
+        { id: "d3", kind: "yellow", ts: now - 3 * h, reason: "Hauen" },
+        { id: "d4", kind: "good", ts: now - 2 * h, reason: "Aufgeräumt" },
+      ],
+    };
+    const past = (n, events) => {
+      const d = addDays(new Date(), -n); d.setHours(10, 0, 0, 0);
+      const ds = dateStr(d);
+      days[dayKey("demo", ds)] = { childId: "demo", date: ds, events: events.map((k, i) => ({ id: `p${n}${i}`, kind: k, ts: d.getTime() + i * h, reason: null })) };
+    };
+    past(2, ["red"]);
+    past(3, ["yellow", "good"]);
+    past(6, ["yellow", "yellow", "yellow", "yellow"]);
+    past(8, ["yellow", "yellow"]);
+    return { children: { demo: child }, days };
+  }
+
+  const isDemo = () => Object.keys(data.children).length === 0;
+  const children = () => {
+    const src = isDemo() ? demo.children : data.children;
+    return Object.values(src).sort((a, b) => a.createdAt - b.createdAt);
+  };
+  const daysSrc = () => (isDemo() ? demo.days : data.days);
+  const dayEvents = (childId, date) => (daysSrc()[dayKey(childId, date)]?.events ?? []);
+  const limit = () => data.settings.yellowLimit || 4;
+
+  let currentId = null;
+  try { currentId = localStorage.getItem("rk-current"); } catch {}
+  function currentChild() {
+    const list = children();
+    return list.find((c) => c.id === currentId) || list[0] || null;
+  }
+  function selectChild(id) {
+    currentId = id;
+    try { localStorage.setItem("rk-current", id); } catch {}
+    render({ rebuild: true });
+  }
+
+  // Persistenz: db-Capability, sonst localStorage, sonst nur Speicher
+  function chain(path, fn) {
+    const prev = writeChains[path] || Promise.resolve();
+    const next = prev.then(fn).catch((e) => { console.warn("Speichern fehlgeschlagen", path, e); if (e?.code === "quota_exceeded") toast("Speicher voll – bitte alte Kinder-Profile löschen."); });
+    writeChains[path] = next;
+    return next;
+  }
+  function saveLocal() {
+    try { localStorage.setItem("rk-data", JSON.stringify(data)); } catch {}
+  }
+  function persistChild(child) {
+    if (storeMode === "db") return chain(`children/${child.id}`, () => db.doc(`children/${child.id}`).set(child));
+    saveLocal();
+  }
+  function persistChildDelete(id) {
+    if (storeMode === "db") {
+      chain(`children/${id}`, () => db.doc(`children/${id}`).delete());
+      Object.keys(data.days).filter((k) => k.startsWith(id + "__")).forEach((k) => chain(`days/${k}`, () => db.doc(`days/${k}`).delete()));
+      return;
+    }
+    saveLocal();
+  }
+  function persistDay(key) {
+    if (storeMode === "db") {
+      const day = data.days[key];
+      return chain(`days/${key}`, () => (day && day.events.length ? db.doc(`days/${key}`).set(day) : db.doc(`days/${key}`).delete()));
+    }
+    saveLocal();
+  }
+  function persistSettings() {
+    if (storeMode === "db") return chain("settings/main", () => db.doc("settings/main").set({ ...data.settings }));
+    saveLocal();
+  }
+
+  async function connectStore() {
+    try {
+      const raw = localStorage.getItem("rk-data");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        Object.assign(data.children, parsed.children || {});
+        Object.assign(data.settings, parsed.settings || {});
+        Object.assign(data.days, parsed.days || {});
+      }
+      storeMode = "local";
+    } catch { storeMode = "memory"; }
+    render({ rebuild: true });
+
+    const api = await (window.claude?.use?.("db") ?? Promise.resolve(null)).catch(() => null);
+    if (!api) return;
+    db = api;
+    storeMode = "db";
+    // Frisch aus der Datenbank laden (lokale Kopie war nur ein Platzhalter)
+    let first = { children: false, days: false, settings: false };
+    const firstLoad = () => first.children && first.days && first.settings;
+    db.collection("children").onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { next[d.id] = { ...d.data(), id: d.id }; });
+      data.children = next; first.children = true; requestRender(firstLoad());
+    }, () => {});
+    db.collection("days").onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { next[d.id] = { ...d.data() }; });
+      data.days = next; first.days = true; requestRender(firstLoad());
+    }, () => {});
+    db.doc("settings/main").onSnapshot((snap) => {
+      if (snap.exists) data.settings = { yellowLimit: 4, sound: true, pinHash: null, ...snap.data() };
+      first.settings = true; requestRender(firstLoad());
+    }, () => {});
+  }
+
+  // ---------- Eltern-Modus (PIN) ----------
+  let unlockedUntil = 0;
+  let pillTimer = null;
+  const needsPin = () => !isDemo() && !!data.settings.pinHash;
+  const isUnlocked = () => !needsPin() || Date.now() < unlockedUntil;
+
+  async function hashPin(pin) {
+    const text = "rotekarte:" + pin;
+    try {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch {
+      let h = 5381; for (const c of text) h = ((h << 5) + h + c.charCodeAt(0)) | 0; return "djb" + (h >>> 0).toString(16);
+    }
+  }
+
+  function withParent(action) {
+    if (isUnlocked()) { if (needsPin()) unlock(); action(); return; }
+    openPinSheet({
+      title: "Eltern-PIN",
+      subtitle: "Karten geben und Einstellungen nur für Eltern.",
+      onPin: async (pin) => {
+        if ((await hashPin(pin)) !== data.settings.pinHash) return "Falscher PIN.";
+        unlock(); closeSheet(); setTimeout(action, 180); return null;
+      },
+      forgot: true,
+    });
+  }
+  function unlock() { unlockedUntil = Date.now() + UNLOCK_MS; updateParentUI(); }
+  function lock() { unlockedUntil = 0; updateParentUI(); }
+  function updateParentUI() {
+    const pill = $("#parent-pill");
+    const open = needsPin() && Date.now() < unlockedUntil;
+    pill.hidden = !open;
+    if (open) {
+      const s = Math.ceil((unlockedUntil - Date.now()) / 1000);
+      pill.textContent = `🔓 Eltern-Modus · noch ${s} s · sperren`;
+      if (!pillTimer) pillTimer = setInterval(updateParentUI, 1000);
+    } else if (pillTimer) { clearInterval(pillTimer); pillTimer = null; }
+    const icon = needsPin() ? (open ? "🔓" : "🔒") : "";
+    document.querySelectorAll(".act .lock").forEach((el) => { el.textContent = icon; });
+  }
+
+  // ---------- Töne ----------
+  let audio = null;
+  function ac() {
+    if (!data.settings.sound) return null;
+    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); return audio; } catch { return null; }
+  }
+  function tone({ type = "sine", from, to = from, dur = 0.2, at = 0, gain = 0.2, vibrato = 0 }) {
+    const a = ac(); if (!a) return;
+    const t = a.currentTime + at;
+    const o = a.createOscillator(); const g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(from, t); o.frequency.exponentialRampToValueAtTime(Math.max(to, 1), t + dur);
+    if (vibrato) { const l = a.createOscillator(); const lg = a.createGain(); l.frequency.value = 28; lg.gain.value = vibrato; l.connect(lg).connect(o.frequency); l.start(t); l.stop(t + dur); }
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  const sfx = {
+    plop: () => { tone({ from: 620, to: 240, dur: 0.18, gain: 0.25 }); },
+    whistle: () => { tone({ from: 2750, dur: 0.22, gain: 0.08, vibrato: 140 }); tone({ from: 2750, dur: 0.55, at: 0.3, gain: 0.08, vibrato: 140 }); },
+    sparkle: () => { [1320, 1660, 1980, 2640].forEach((f, i) => tone({ from: f, dur: 0.12, at: i * 0.07, gain: 0.08 })); },
+    sad: () => { [392, 349, 330, 262].forEach((f, i) => tone({ type: "triangle", from: f, to: i === 3 ? 220 : f, dur: i === 3 ? 0.6 : 0.22, at: i * 0.24, gain: 0.18 })); },
+    flip: () => { tone({ type: "triangle", from: 300, to: 900, dur: 0.12, gain: 0.12 }); },
+  };
+  const buzz = (p) => { try { navigator.vibrate?.(p); } catch {} };
+
+  // ---------- Roadmap (SVG) ----------
+  const road = $("#road");
+  const NS = "http://www.w3.org/2000/svg";
+  const PATH_D = "M 40 226 C 130 256, 262 226, 246 170 C 232 124, 84 150, 92 100 C 100 58, 214 74, 292 62";
+  let geo = null; // { key, len, stations:[{x,y}], goal:{x,y} }
+
+  function svgEl(tag, attrs = {}, parent) {
+    const el = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+
+  function buildRoad(child, n) {
+    road.textContent = "";
+    const base = svgEl("path", { d: PATH_D, class: "road-base" }, road);
+    const len = base.getTotalLength();
+    const prog = svgEl("path", { d: PATH_D, class: "road-progress", id: "road-progress" }, road);
+    prog.style.strokeDasharray = `${len}`;
+    prog.style.strokeDashoffset = `${len}`;
+
+    const start = base.getPointAtLength(0);
+    svgEl("circle", { cx: start.x, cy: start.y, r: 7, class: "start-dot" }, road);
+    const sl = svgEl("text", { x: start.x - 6, y: start.y + 26, class: "start-label" }, road); sl.textContent = "Start";
+
+    const goalLen = len;
+    const stations = [];
+    for (let i = 0; i < n; i++) {
+      const at = (len * (i + 1)) / (n + 1.15);
+      const p = base.getPointAtLength(at);
+      stations.push({ x: p.x, y: p.y, at });
+      const g = svgEl("g", { class: "station", "data-i": i, transform: `translate(${p.x} ${p.y}) rotate(${i % 2 ? 8 : -8})` }, road);
+      const inner = svgEl("g", { class: "station-inner" }, g);
+      svgEl("rect", { x: -15, y: -20, width: 30, height: 40, rx: 5 }, inner);
+      const t = svgEl("text", { x: 0, y: 1 }, inner); t.textContent = i + 1;
+    }
+    const gp = base.getPointAtLength(goalLen);
+    const goal = svgEl("g", { class: "goal-group", id: "goal", transform: `translate(${gp.x} ${gp.y})` }, road);
+    svgEl("circle", { r: 36, class: "goal-ring" }, goal);
+    svgEl("circle", { r: 29, class: "goal-plate" }, goal);
+    const wob = svgEl("g", { class: "goal-wobble" }, goal);
+    const em = svgEl("text", { x: 0, y: 2, class: "goal-emoji", id: "goal-emoji" }, wob); em.textContent = child.rewardEmoji;
+    svgEl("circle", { cx: -7, cy: 22, r: 3.2, class: "drip d1" }, goal);
+    svgEl("circle", { cx: 8, cy: 22, r: 2.6, class: "drip d2" }, goal);
+    svgEl("line", { x1: -24, y1: -24, x2: 24, y2: 24, class: "goal-strike" }, goal);
+    const cap = svgEl("text", { x: 0, y: 52, class: "goal-caption", "text-anchor": "middle" }, goal); cap.textContent = child.rewardName.length > 14 ? "Belohnung" : child.rewardName;
+
+    const ob = svgEl("g", { class: "overflow-badge", id: "overflow", transform: `translate(${gp.x - 42} ${gp.y - 30})` }, road);
+    svgEl("rect", { x: -16, y: -11, width: 32, height: 22, rx: 11 }, ob);
+    svgEl("text", { x: 0, y: 1, id: "overflow-text" }, ob);
+
+    const runner = svgEl("g", { class: "runner", id: "runner" }, road);
+    const body = svgEl("g", { class: "runner-body" }, runner);
+    svgEl("circle", { r: 16, cy: -2, class: "runner-plate" }, body);
+    const re = svgEl("text", { y: -1, class: "runner-emoji" }, body); re.textContent = child.avatar;
+
+    geo = { key: `${child.id}|${n}|${child.rewardEmoji}|${child.avatar}|${child.rewardName}`, len, stations, goal: { x: gp.x, y: gp.y } };
+  }
+
+  function runnerPos(st) {
+    if (st.loss) return { x: geo.goal.x - 34, y: geo.goal.y + 22, at: geo.len };
+    if (st.filled === 0) { const p = { x: 40, y: 226 }; return { x: p.x + 2, y: p.y - 26, at: 0 }; }
+    const s = geo.stations[st.filled - 1];
+    return { x: s.x, y: s.y - 38, at: s.at };
+  }
+
+  let lossAnimUntil = 0;
+  let popAnim = { index: -1, until: 0 };
+  function updateRoad(child, st, opts = {}) {
+    const now = Date.now();
+    if (opts.justLost) lossAnimUntil = now + 3500;
+    if (opts.pop !== undefined) popAnim = { index: opts.pop, until: now + 600 };
+    const popIndex = now < popAnim.until ? popAnim.index : -1;
+    const n = st.limit;
+    const key = `${child.id}|${n}|${child.rewardEmoji}|${child.avatar}|${child.rewardName}`;
+    const fresh = !geo || geo.key !== key || opts.rebuild;
+    if (fresh) buildRoad(child, n);
+
+    const pitch = $("#pitch");
+    pitch.style.setProperty("--kid", child.color);
+    road.querySelectorAll(".station").forEach((g, i) => {
+      g.classList.toggle("filled", i < st.filled);
+      g.classList.toggle("pop", popIndex === i);
+    });
+    const pos = runnerPos(st);
+    const runner = $("#runner");
+    if (fresh) runner.style.transition = "none";
+    runner.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+    if (fresh) { runner.getBoundingClientRect(); runner.style.transition = ""; }
+    runner.classList.remove("hop");
+    if (opts.hop) { runner.getBoundingClientRect(); runner.classList.add("hop"); }
+
+    const prog = $("#road-progress");
+    if (fresh) prog.style.transition = "none";
+    prog.style.strokeDashoffset = `${geo.len - pos.at}`;
+    if (fresh) { prog.getBoundingClientRect(); prog.style.transition = ""; }
+
+    pitch.classList.toggle("animate-loss", !!st.loss && now < lossAnimUntil);
+    pitch.classList.toggle("lost", !!st.loss);
+    pitch.classList.toggle("melt", child.rewardEmoji === "🍦");
+
+    const ob = $("#overflow");
+    ob.style.display = st.overflow > 0 ? "" : "none";
+    $("#overflow-text").textContent = `+${st.overflow}`;
+  }
+
+  // ---------- Rendern ----------
+  let animating = false;
+  let renderPending = false;
+  let lastDate = todayStr();
+
+  function requestRender(ready = true) {
+    if (!ready) return;
+    if (animating) { renderPending = true; return; }
+    render();
+  }
+
+  function render(opts = {}) {
+    const child = currentChild();
+    if (!child) return;
+    if (currentId !== child.id) currentId = child.id;
+    const today = todayStr();
+    lastDate = today;
+    const events = dayEvents(child.id, today);
+    const st = evaluate(events, limit());
+
+    // Kinder-Leiste
+    const kids = $("#kids");
+    kids.innerHTML = children().map((c) => `
+      <button class="kid-chip" style="--kid:${esc(c.color)}" aria-pressed="${c.id === child.id}" data-kid="${esc(c.id)}">
+        <span class="av">${esc(c.avatar)}</span>${esc(c.name)}
+      </button>`).join("") + (isDemo() ? "" : `<button class="kid-chip add" data-add-kid aria-label="Kind hinzufügen">＋ Kind</button>`);
+
+    $("#demo-banner").hidden = !isDemo();
+    updateRoad(child, st, opts);
+
+    $("#star-count").textContent = st.stars;
+    const status = $("#status");
+    status.textContent = statusText(st, child.rewardName);
+    status.className = "status" + (st.loss ? " lost" : st.remaining === 1 ? " warn" : "");
+    $("#good-label").textContent = st.loss ? "Gute Tat sammeln" : "Gute Tat";
+    const d = new Date();
+    $("#pitch-label").textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+
+    // Tagesverlauf
+    const log = $("#log");
+    if (!events.length) {
+      log.innerHTML = `<li class="empty">Noch nichts passiert heute. ${esc(child.rewardEmoji)} wartet am Ende des Weges.</li>`;
+    } else {
+      log.innerHTML = [...st.ordered].reverse().map((e) => {
+        const o = st.outcomes[e.id];
+        let what = "", cls = "";
+        if (o.t === "active") what = "Gelbe Karte";
+        if (o.t === "struck") { what = "Gelbe Karte"; cls = "struck"; }
+        if (o.t === "red") what = "Rote Karte";
+        if (o.t === "goodStruck") what = "Gute Tat – gelbe Karte gestrichen";
+        if (o.t === "goodRemembered") what = st.loss && e.ts > (st.ordered.find((x) => x.id === st.lostBy)?.ts ?? Infinity) ? "Gute Tat – gesammelt" : "Gute Tat";
+        const kindCls = e.kind === "good" ? "good" : e.kind;
+        return `<li class="entry ${cls}">
+          <span class="kind ${kindCls}">${e.kind === "good" ? "⭐" : ""}</span>
+          <span><span class="what">${esc(what)}</span>${e.reason ? `<br><span class="why">${esc(e.reason)}</span>` : ""}</span>
+          <time>${timeStr(e.ts)}</time>
+        </li>`;
+      }).join("");
+    }
+    updateParentUI();
+  }
+
+  // ---------- Animationen ----------
+  const fx = $("#fx");
+  const center = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; };
+  const T = (x, y, w, h, s = 1, extra = "") => `translate(${x - w / 2}px, ${y - h / 2}px) scale(${s}) ${extra}`;
+  const motionOK = () => !reduceMotion.matches;
+
+  function spawn(html, cls) {
+    const el = document.createElement("div");
+    el.className = "fly " + cls;
+    el.innerHTML = html;
+    fx.appendChild(el);
+    return el;
+  }
+
+  async function flyCard(kind, target) {
+    const el = spawn("!", `fly-card ${kind}`);
+    const w = 78, h = 108;
+    const vw = innerWidth, vh = innerHeight;
+    const c = { x: vw / 2, y: vh * 0.42 };
+    const ts = Math.max(0.3, target.w / w);
+    let frames;
+    if (kind === "yellow") {
+      frames = [
+        { transform: T(c.x, c.y, w, h, 0.2, "perspective(600px) rotateY(180deg)"), offset: 0 },
+        { transform: T(c.x, c.y, w, h, 1.4, "perspective(600px) rotateY(0deg)"), offset: 0.35 },
+        { transform: T(c.x, c.y, w, h, 1.4, "perspective(600px) rotateY(0deg) rotate(-4deg)"), offset: 0.55 },
+        { transform: T(target.x, target.y, w, h, ts, "perspective(600px) rotate(-8deg)"), offset: 1 },
+      ];
+    } else {
+      frames = [
+        { transform: T(c.x, vh + 120, w, h, 1.6, "rotate(-12deg)"), offset: 0 },
+        { transform: T(c.x, c.y, w, h, 1.7, "rotate(6deg)"), offset: 0.3 },
+        { transform: T(c.x, c.y, w, h, 1.7, "rotate(-7deg)"), offset: 0.42 },
+        { transform: T(c.x, c.y, w, h, 1.7, "rotate(6deg)"), offset: 0.54 },
+        { transform: T(c.x, c.y, w, h, 1.7, "rotate(0deg)"), offset: 0.62 },
+        { transform: T(target.x, target.y, w, h, 0.45, "rotate(-35deg)"), offset: 1 },
+      ];
+    }
+    const a = el.animate(frames, { duration: kind === "yellow" ? 1300 : 1900, easing: "cubic-bezier(.45,.05,.35,1)", fill: "forwards" });
+    await a.finished.catch(() => {});
+    el.remove();
+  }
+
+  async function redFlash() {
+    const f = document.createElement("div"); f.className = "flash"; fx.appendChild(f);
+    await f.animate([{ opacity: 0 }, { opacity: 0.45 }, { opacity: 0 }], { duration: 450 }).finished.catch(() => {});
+    f.remove();
+  }
+
+  async function flyStar(from, to) {
+    const el = spawn("⭐", "fly-star");
+    const w = 44, h = 44;
+    const mid = { x: (from.x + to.x) / 2 + 60, y: Math.min(from.y, to.y) - 80 };
+    const a = el.animate([
+      { transform: T(from.x, from.y, w, h, 0.4, "rotate(0deg)") },
+      { transform: T(mid.x, mid.y, w, h, 1.5, "rotate(200deg)"), offset: 0.5 },
+      { transform: T(to.x, to.y, w, h, 0.9, "rotate(400deg)") },
+    ], { duration: 1100, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+    const sparkTimer = setInterval(() => {
+      const r = el.getBoundingClientRect();
+      const s = document.createElement("div"); s.className = "spark"; fx.appendChild(s);
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const dx = (Math.random() - 0.5) * 60, dy = (Math.random() - 0.2) * 60;
+      s.animate([
+        { transform: `translate(${x}px, ${y}px) scale(1)`, opacity: 1 },
+        { transform: `translate(${x + dx}px, ${y + dy}px) scale(0)`, opacity: 0 },
+      ], { duration: 600, easing: "ease-out" }).finished.then(() => s.remove(), () => s.remove());
+    }, 45);
+    await a.finished.catch(() => {});
+    clearInterval(sparkTimer);
+    burst(to, 14);
+    el.remove();
+  }
+
+  function burst(at, n) {
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement("div"); s.className = "spark"; fx.appendChild(s);
+      const ang = (Math.PI * 2 * i) / n, d = 40 + Math.random() * 30;
+      s.animate([
+        { transform: `translate(${at.x}px, ${at.y}px) scale(1.2)`, opacity: 1 },
+        { transform: `translate(${at.x + Math.cos(ang) * d}px, ${at.y + Math.sin(ang) * d}px) scale(0)`, opacity: 0 },
+      ], { duration: 700, easing: "cubic-bezier(.2,.8,.3,1)" }).finished.then(() => s.remove(), () => s.remove());
+    }
+  }
+
+  async function fallOff(stationEl) {
+    const r = center(stationEl);
+    stationEl.style.visibility = "hidden";
+    const el = spawn("", "fly-fall");
+    const w = 30, h = 40, s = r.h / h;
+    await el.animate([
+      { transform: T(r.x, r.y, w, h, s, "rotate(-8deg)") },
+      { transform: T(r.x + 6, r.y - 20, w, h, s, "rotate(12deg)"), offset: 0.25 },
+      { transform: T(r.x + 40, r.y + 220, w, h, s * 0.8, "rotate(160deg)"), opacity: 0 },
+    ], { duration: 900, easing: "cubic-bezier(.5,0,.8,.6)", fill: "forwards" }).finished.catch(() => {});
+    el.remove();
+    stationEl.style.visibility = "";
+  }
+
+  // ---------- Aktionen ----------
+  async function commitEvent(kind, reason) {
+    const child = currentChild();
+    const date = todayStr();
+    const key = dayKey(child.id, date);
+    const events = dayEvents(child.id, date);
+    const before = evaluate(events, limit());
+    const ev = { id: uid(), kind, ts: Date.now(), reason: reason || null };
+    const after = evaluate([...events, ev], limit());
+    const justLost = !before.loss && !!after.loss;
+
+    animating = true;
+    try {
+      if (kind === "yellow") {
+        sfx.flip(); buzz(30);
+        const idx = before.active.length;
+        const stEl = road.querySelector(`.station[data-i="${Math.min(idx, before.limit - 1)}"]`);
+        const target = idx < before.limit && stEl ? center(stEl) : center($("#goal"));
+        if (motionOK()) await flyCard("yellow", target);
+        sfx.plop();
+      } else if (kind === "red") {
+        sfx.whistle(); buzz([60, 40, 60]);
+        if (motionOK()) { redFlash(); await flyCard("red", center($("#goal"))); }
+      } else {
+        sfx.sparkle();
+        const o = after.outcomes[ev.id];
+        const from = center($("#btn-good"));
+        if (o.t === "goodStruck") {
+          const idx = before.active.length - 1;
+          const stEl = road.querySelector(`.station[data-i="${idx}"]`);
+          if (motionOK() && stEl) { await flyStar(from, center(stEl)); await fallOff(stEl); }
+        } else if (motionOK()) {
+          await flyStar(from, center($("#star-bank")));
+        }
+      }
+    } finally {
+      animating = false;
+    }
+
+    const store = isDemo() ? demo.days : data.days;
+    store[key] = { childId: child.id, date, events: [...events, ev] };
+    render({
+      pop: kind === "yellow" && before.active.length < before.limit ? before.active.length : undefined,
+      hop: kind !== "red" && !after.loss,
+      justLost,
+    });
+    if (kind === "good") { const b = $("#star-bank"); b.classList.remove("bump"); b.getBoundingClientRect(); b.classList.add("bump"); }
+    if (justLost) { setTimeout(() => { sfx.sad(); buzz([100, 60, 160]); }, 700); }
+    if (!isDemo()) persistDay(key);
+    renderPending = false;
+
+    const label = kind === "yellow" ? "Gelbe Karte vergeben" : kind === "red" ? "Rote Karte vergeben" : "Gute Tat eingetragen";
+    toast(label, "Rückgängig", () => undoEvent(child.id, date, ev.id));
+  }
+
+  function undoEvent(childId, date, id) {
+    const key = dayKey(childId, date);
+    const store = isDemo() ? demo.days : data.days;
+    const day = store[key];
+    if (!day) return;
+    day.events = day.events.filter((e) => e.id !== id);
+    if (!day.events.length) delete store[key];
+    render();
+    if (!isDemo()) {
+      if (!store[key]) { if (storeMode === "db") chain(`days/${key}`, () => db.doc(`days/${key}`).delete()); else saveLocal(); }
+      else persistDay(key);
+    }
+  }
+
+  // ---------- Toast ----------
+  let toastTimer = null;
+  function toast(text, actionLabel, action) {
+    const host = $("#toast-host");
+    clearTimeout(toastTimer);
+    host.innerHTML = `<div class="toast" role="status"><span>${esc(text)}</span>${actionLabel ? `<button type="button">${esc(actionLabel)}</button>` : ""}</div>`;
+    if (actionLabel) $("button", host).addEventListener("click", () => { host.innerHTML = ""; withParent(action); });
+    toastTimer = setTimeout(() => { host.innerHTML = ""; }, 6000);
+  }
+
+  // ---------- Sheets ----------
+  const sheetHost = $("#sheet-host");
+  let lastFocus = null;
+  function openSheet(inner, { tall = false, label = "Dialog" } = {}) {
+    lastFocus = document.activeElement;
+    sheetHost.innerHTML = `<div class="sheet-root"><div class="sheet-backdrop" data-close></div>
+      <div class="sheet${tall ? " tall" : ""}" role="dialog" aria-modal="true" aria-label="${esc(label)}"><div class="grabber"></div>${inner}</div></div>`;
+    sheetHost.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", closeSheet));
+    const sheet = $(".sheet", sheetHost);
+    setTimeout(() => (sheet.querySelector("[autofocus]") || sheet.querySelector("button, input"))?.focus({ preventScroll: true }), 50);
+    return sheet;
+  }
+  function closeSheet() { sheetHost.innerHTML = ""; lastFocus?.focus?.({ preventScroll: true }); }
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && sheetHost.innerHTML) closeSheet(); });
+
+  function chipsHTML(list) { return `<div class="chips">${list.map((r) => `<button type="button" class="chip" aria-pressed="false" data-reason="${esc(r)}">${esc(r)}</button>`).join("")}</div>`; }
+  function wireChips(sheet, input) {
+    sheet.querySelectorAll("[data-reason]").forEach((b) => b.addEventListener("click", () => {
+      const on = b.getAttribute("aria-pressed") !== "true";
+      sheet.querySelectorAll("[data-reason]").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", String(on));
+      input.value = on ? b.dataset.reason : "";
+    }));
+  }
+
+  function openCardSheet(kind) {
+    const child = currentChild();
+    const isRed = kind === "red";
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>${isRed ? "Rote Karte" : "Gelbe Karte"} für ${esc(child.name)}</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      <div class="card-hero"><div class="big-card ${kind}"></div></div>
+      ${isRed ? `<p class="note">${esc(child.rewardEmoji)} ${esc(child.rewardName)} ist damit für heute sofort gestrichen.</p>` : ""}
+      <h3>Warum? (optional)</h3>
+      ${chipsHTML(REASONS_BAD)}
+      <div class="field"><label for="reason">Eigener Grund</label><input class="input" id="reason" maxlength="60" placeholder="z. B. Spielzeug geworfen"></div>
+      <div class="row"><button class="btn" data-close>Abbrechen</button><button class="btn ${kind}" id="confirm">Karte geben</button></div>
+    `, { label: isRed ? "Rote Karte" : "Gelbe Karte" });
+    const input = $("#reason", sheet);
+    wireChips(sheet, input);
+    $("#confirm", sheet).addEventListener("click", () => { const r = input.value.trim(); closeSheet(); setTimeout(() => commitEvent(kind, r), 120); });
+  }
+
+  function openGoodSheet() {
+    const child = currentChild();
+    const st = evaluate(dayEvents(child.id, todayStr()), limit());
+    let note = "";
+    if (st.loss) note = `${esc(child.rewardName)} ist heute schon gestrichen. Die gute Tat wird trotzdem als Stern gesammelt.`;
+    else if (!st.active.length) note = "Es gibt gerade keine gelbe Karte zum Streichen. Die gute Tat wird als Stern gesammelt.";
+    else note = "Die zuletzt vergebene gelbe Karte wird gestrichen.";
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>Gute Tat von ${esc(child.name)}</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      <div class="card-hero"><div class="big-star">⭐</div></div>
+      <p class="note">${note}</p>
+      <h3>Was war gut? (optional)</h3>
+      ${chipsHTML(REASONS_GOOD)}
+      <div class="field"><label for="reason">Eigener Grund</label><input class="input" id="reason" maxlength="60" placeholder="z. B. Tisch gedeckt"></div>
+      <div class="row"><button class="btn" data-close>Abbrechen</button><button class="btn good" id="confirm">Eintragen</button></div>
+    `, { label: "Gute Tat" });
+    const input = $("#reason", sheet);
+    wireChips(sheet, input);
+    $("#confirm", sheet).addEventListener("click", () => { const r = input.value.trim(); closeSheet(); setTimeout(() => commitEvent("good", r), 120); });
+  }
+
+  // PIN-Eingabe
+  function openPinSheet({ title, subtitle, onPin, forgot = false, cancelable = true }) {
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>${esc(title)}</h2>${cancelable ? `<button class="close-btn" data-close aria-label="Schließen">✕</button>` : ""}</div>
+      <p class="muted">${esc(subtitle)}</p>
+      <div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>
+      <div class="pin-msg" id="pin-msg"></div>
+      <div class="pin-pad">
+        ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button class="pin-key" data-k="${n}">${n}</button>`).join("")}
+        <span></span><button class="pin-key" data-k="0">0</button><button class="pin-key ghost" data-k="del" aria-label="Löschen">⌫</button>
+      </div>
+      ${forgot ? `<button class="link-btn" id="forgot">PIN vergessen?</button>` : ""}
+    `, { label: title });
+    let pin = "";
+    const dots = $("#dots", sheet);
+    const msg = $("#pin-msg", sheet);
+    const show = () => dots.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i < pin.length));
+    const press = async (k) => {
+      if (k === "del") { pin = pin.slice(0, -1); show(); return; }
+      if (pin.length >= 4) return;
+      pin += k; show(); msg.textContent = "";
+      if (pin.length === 4) {
+        const err = await onPin(pin);
+        if (err) { msg.textContent = err; dots.classList.remove("error"); dots.getBoundingClientRect(); dots.classList.add("error"); buzz(80); pin = ""; setTimeout(show, 250); }
+      }
+    };
+    sheet.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => press(b.dataset.k)));
+    sheet.addEventListener("keydown", (e) => { if (/^[0-9]$/.test(e.key)) press(e.key); if (e.key === "Backspace") press("del"); });
+    $("#forgot", sheet)?.addEventListener("click", openForgotSheet);
+  }
+
+  function openNewPinSheet(after) {
+    let first = null;
+    const step = () => openPinSheet({
+      title: first ? "PIN wiederholen" : "Neuen PIN festlegen",
+      subtitle: first ? "Bitte den PIN noch einmal eingeben." : "4 Ziffern. Damit können nur Eltern Karten geben.",
+      onPin: async (pin) => {
+        if (!first) { first = pin; step(); return null; }
+        if (pin !== first) { first = null; setTimeout(step, 400); return "Die PINs stimmen nicht überein."; }
+        data.settings.pinHash = await hashPin(pin);
+        persistSettings();
+        unlock(); closeSheet(); after?.(); return null;
+      },
+    });
+    step();
+  }
+
+  function openForgotSheet() {
+    const a = 12 + Math.floor(Math.random() * 8), b = 13 + Math.floor(Math.random() * 16);
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>PIN vergessen</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      <p>Aufgabe für Erwachsene: Wie viel ist <strong>${a} × ${b}</strong>?</p>
+      <div class="field"><label for="answer">Ergebnis</label><input class="input" id="answer" inputmode="numeric" autocomplete="off"></div>
+      <div class="pin-msg" id="ans-msg"></div>
+      <button class="btn primary" id="check">Prüfen</button>
+    `, { label: "PIN vergessen" });
+    $("#check", sheet).addEventListener("click", () => {
+      if (Number($("#answer", sheet).value) === a * b) openNewPinSheet(() => toast("Neuer PIN gespeichert"));
+      else $("#ans-msg", sheet).textContent = "Das stimmt leider nicht.";
+    });
+  }
+
+  // Kind anlegen / bearbeiten
+  function openChildSheet(existing, { onboarding = false } = {}) {
+    const c = existing ? { ...existing } : { id: uid(), name: "", avatar: "👧", color: COLORS[children().length % COLORS.length], rewardName: "Eis", rewardEmoji: "🍦", createdAt: Date.now() };
+    const presetIdx = REWARDS.findIndex((r) => r.emoji === c.rewardEmoji && r.name === c.rewardName);
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>${onboarding ? "Euer Kind" : existing ? "Kind bearbeiten" : "Kind hinzufügen"}</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      ${onboarding ? `<p class="muted">Danach legt ihr einen Eltern-PIN fest. Das Beispiel verschwindet dann.</p>` : ""}
+      <div class="field"><label for="c-name">Name</label><input class="input" id="c-name" maxlength="20" value="${esc(c.name)}" placeholder="z. B. Mia" autocomplete="off"></div>
+      <h3>Avatar</h3>
+      <div class="emoji-grid">${AVATARS.map((a) => `<button type="button" class="emoji-opt" data-av="${a}" aria-pressed="${a === c.avatar}">${a}</button>`).join("")}</div>
+      <h3>Farbe</h3>
+      <div class="emoji-grid">${COLORS.map((col) => `<button type="button" class="color-opt" style="background:${col}" data-col="${col}" aria-pressed="${col === c.color}" aria-label="Farbe ${col}"></button>`).join("")}</div>
+      <h3>Belohnung am Ende des Weges</h3>
+      <div class="reward-grid">${REWARDS.map((r, i) => `<button type="button" class="reward-opt" data-rw="${i}" aria-pressed="${i === presetIdx}"><span>${r.emoji}</span>${esc(r.name)}</button>`).join("")}</div>
+      <div class="row">
+        <div class="field" style="flex:0 0 84px"><label for="c-remoji">Emoji</label><input class="input" id="c-remoji" maxlength="4" value="${esc(c.rewardEmoji)}"></div>
+        <div class="field"><label for="c-rname">Eigene Belohnung</label><input class="input" id="c-rname" maxlength="30" value="${esc(c.rewardName)}"></div>
+      </div>
+      <div class="pin-msg" id="c-msg"></div>
+      <button class="btn primary" id="c-save">${onboarding ? "Weiter" : "Speichern"}</button>
+      ${existing && children().length > 1 ? `<button class="btn danger" id="c-del">Kind löschen</button>` : ""}
+    `, { tall: true, label: "Kind" });
+
+    const pick = (attr, val) => sheet.querySelectorAll(`[${attr}]`).forEach((b) => b.setAttribute("aria-pressed", String(b.getAttribute(attr) === val)));
+    sheet.querySelectorAll("[data-av]").forEach((b) => b.addEventListener("click", () => { c.avatar = b.dataset.av; pick("data-av", c.avatar); }));
+    sheet.querySelectorAll("[data-col]").forEach((b) => b.addEventListener("click", () => { c.color = b.dataset.col; pick("data-col", c.color); }));
+    const rEmoji = $("#c-remoji", sheet), rName = $("#c-rname", sheet);
+    sheet.querySelectorAll("[data-rw]").forEach((b) => b.addEventListener("click", () => {
+      const r = REWARDS[Number(b.dataset.rw)]; rEmoji.value = r.emoji; rName.value = r.name; pick("data-rw", b.dataset.rw);
+    }));
+    [rEmoji, rName].forEach((i) => i.addEventListener("input", () => pick("data-rw", "-")));
+
+    $("#c-save", sheet).addEventListener("click", () => {
+      c.name = $("#c-name", sheet).value.trim();
+      c.rewardEmoji = rEmoji.value.trim() || "🎁";
+      c.rewardName = rName.value.trim() || "Belohnung";
+      if (!c.name) { $("#c-msg", sheet).textContent = "Bitte einen Namen eingeben."; return; }
+      const save = () => {
+        data.children[c.id] = c;
+        persistChild(c);
+        currentId = c.id;
+        try { localStorage.setItem("rk-current", c.id); } catch {}
+        render({ rebuild: true });
+      };
+      if (onboarding) {
+        openNewPinSheet(() => { save(); toast(`Los geht's, ${c.name}! ${c.rewardEmoji}`); });
+      } else { save(); closeSheet(); }
+    });
+    $("#c-del", sheet)?.addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = `Wirklich ${c.name} und alle Karten löschen?`; return; }
+      persistChildDelete(c.id);
+      delete data.children[c.id];
+      Object.keys(data.days).filter((k) => k.startsWith(c.id + "__")).forEach((k) => delete data.days[k]);
+      if (storeMode !== "db") saveLocal();
+      closeSheet(); render({ rebuild: true });
+    });
+  }
+
+  // Einstellungen
+  function openSettings() {
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>Einstellungen</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      <h3>Kinder</h3>
+      <div class="list">${children().map((c) => `
+        <div class="list-item"><span style="font-size:28px">${esc(c.avatar)}</span>
+          <div class="grow"><div class="title">${esc(c.name)}</div><div class="sub">Belohnung: ${esc(c.rewardEmoji)} ${esc(c.rewardName)}</div></div>
+          <button class="btn small" data-edit="${esc(c.id)}">Bearbeiten</button></div>`).join("")}
+      </div>
+      <button class="btn" id="s-add">＋ Kind hinzufügen</button>
+      <h3>Spielregeln</h3>
+      <div class="list-item"><div class="grow"><div class="title">Gelbe Karten bis zum Verlust</div><div class="sub">Gilt für alle Kinder</div></div>
+        <div class="stepper"><button id="lim-dec" aria-label="Weniger">−</button><output id="lim">${limit()}</output><button id="lim-inc" aria-label="Mehr">+</button></div></div>
+      <div class="list-item"><div class="grow"><div class="title">Töne</div><div class="sub">Pfiff, Plopp und Glitzern</div></div>
+        <button class="switch" role="switch" id="snd" aria-checked="${!!data.settings.sound}" aria-label="Töne"></button></div>
+      <h3>Eltern</h3>
+      <button class="btn" id="s-pin">PIN ändern</button>
+      <p class="muted">${storeMode === "db" ? "Die Daten werden mit dieser Seite gespeichert und sind auf jedem Gerät verfügbar, auf dem ihr sie öffnet." : storeMode === "local" ? "Die Daten werden nur in diesem Browser gespeichert." : "Die Daten werden nicht gespeichert."}
+      Diese Vorschau ist ein Nachbau der geplanten iOS-App.</p>
+    `, { tall: true, label: "Einstellungen" });
+    sheet.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => openChildSheet(data.children[b.dataset.edit])));
+    $("#s-add", sheet).addEventListener("click", () => openChildSheet(null));
+    const setLim = (d) => {
+      const v = Math.min(6, Math.max(3, limit() + d));
+      if (v === limit()) return;
+      data.settings.yellowLimit = v; $("#lim", sheet).textContent = v; persistSettings(); render({ rebuild: true });
+    };
+    $("#lim-dec", sheet).addEventListener("click", () => setLim(-1));
+    $("#lim-inc", sheet).addEventListener("click", () => setLim(1));
+    $("#snd", sheet).addEventListener("click", (e) => {
+      data.settings.sound = !data.settings.sound; e.currentTarget.setAttribute("aria-checked", String(data.settings.sound)); persistSettings();
+    });
+    $("#s-pin", sheet).addEventListener("click", () => openNewPinSheet(() => toast("Neuer PIN gespeichert")));
+  }
+
+  // Verlauf / Kalender
+  function openHistory() {
+    const child = currentChild();
+    const now = new Date();
+    let month = new Date(now.getFullYear(), now.getMonth(), 1);
+    let selected = todayStr();
+    const createdDay = dateStr(new Date(child.createdAt));
+
+    const dayState = (ds) => evaluate(dayEvents(child.id, ds), limit());
+    function streak() {
+      let n = 0;
+      if (!dayState(todayStr()).loss) n++;
+      for (let d = addDays(now, -1); dateStr(d) >= createdDay; d = addDays(d, -1)) {
+        if (dayState(dateStr(d)).loss) break; n++;
+      }
+      return n;
+    }
+    function monthStars() {
+      const prefix = dateStr(month).slice(0, 7);
+      return Object.values(daysSrc()).filter((d) => d.childId === child.id && d.date.startsWith(prefix))
+        .reduce((s, d) => s + d.events.filter((e) => e.kind === "good").length, 0);
+    }
+
+    const sheet = openSheet(`<div id="hist"></div>`, { tall: true, label: "Verlauf" });
+    const host = $("#hist", sheet);
+
+    function draw() {
+      const first = (month.getDay() + 6) % 7;
+      const daysIn = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+      const today = todayStr();
+      let cells = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((d) => `<span class="dow">${d}</span>`).join("");
+      for (let i = 0; i < first; i++) cells += `<span class="cal-day blank"></span>`;
+      for (let d = 1; d <= daysIn; d++) {
+        const ds = dateStr(new Date(month.getFullYear(), month.getMonth(), d));
+        const active = ds >= createdDay && ds <= today;
+        const st = active ? dayState(ds) : null;
+        const cls = ["cal-day", st?.loss ? "lost" : "", ds === today ? "today" : "", !active ? "blank" : ""].join(" ");
+        cells += active
+          ? `<button class="${cls}" data-day="${ds}" aria-pressed="${ds === selected}" aria-label="${d}. ${st.loss ? "ohne" : "mit"} ${esc(child.rewardName)}"><span class="sym">${esc(child.rewardEmoji)}</span>${d}</button>`
+          : `<span class="${cls}">${d}</span>`;
+      }
+      const sel = dayState(selected);
+      const selEvents = sel.ordered;
+      const selDate = parseDate(selected).toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" });
+      const canPrev = createdDay.slice(0, 7) < dateStr(month).slice(0, 7);
+      const canNext = dateStr(month).slice(0, 7) < today.slice(0, 7);
+      host.innerHTML = `
+        <div class="sheet-head"><h2>Verlauf von ${esc(child.name)}</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+        <div class="stats" style="margin-top:12px">
+          <div class="stat"><b>${streak()}</b><span>Tage mit ${esc(child.rewardName)} in Folge</span></div>
+          <div class="stat"><b>${monthStars()} ⭐</b><span>gute Taten in diesem Monat</span></div>
+        </div>
+        <div class="cal-head" style="margin-top:16px">
+          <button class="icon-btn" id="prev" aria-label="Vorheriger Monat" ${canPrev ? "" : "disabled style='opacity:.3'"}>‹</button>
+          <strong>${month.toLocaleDateString("de-DE", { month: "long", year: "numeric" })}</strong>
+          <button class="icon-btn" id="next" aria-label="Nächster Monat" ${canNext ? "" : "disabled style='opacity:.3'"}>›</button>
+        </div>
+        <div class="cal" style="margin-top:10px">${cells}</div>
+        <h3 style="margin-top:18px">${esc(selDate)}</h3>
+        <p style="margin:6px 0 10px;font-weight:700">${sel.loss ? `${esc(child.rewardEmoji)} gestrichen` : `${esc(child.rewardEmoji)} ${esc(child.rewardName)} ${selected === today ? "– bisher erlaubt" : "gab es"}`}</p>
+        <div class="list">${selEvents.length ? selEvents.map((e) => {
+          const o = sel.outcomes[e.id];
+          const what = e.kind === "yellow" ? (o.t === "struck" ? "Gelbe Karte (gestrichen)" : "Gelbe Karte") : e.kind === "red" ? "Rote Karte" : (o.t === "goodStruck" ? "Gute Tat – gelbe Karte gestrichen" : "Gute Tat");
+          return `<div class="list-item"><span class="kind" style="width:18px;height:25px;border-radius:3px;background:${e.kind === "yellow" ? "var(--yellow)" : e.kind === "red" ? "var(--red)" : "none"}">${e.kind === "good" ? "⭐" : ""}</span>
+            <div class="grow"><div class="title">${esc(what)}</div>${e.reason ? `<div class="sub">${esc(e.reason)}</div>` : ""}</div><span class="sub">${timeStr(e.ts)}</span></div>`;
+        }).join("") : `<div class="empty">Keine Karten an diesem Tag.</div>`}</div>`;
+      host.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", closeSheet));
+      host.querySelectorAll("[data-day]").forEach((b) => b.addEventListener("click", () => { selected = b.dataset.day; draw(); }));
+      $("#prev", host).addEventListener("click", () => { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); draw(); });
+      $("#next", host).addEventListener("click", () => { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); draw(); });
+    }
+    draw();
+  }
+
+  // ---------- Verdrahtung ----------
+  $("#btn-yellow").addEventListener("click", () => withParent(() => openCardSheet("yellow")));
+  $("#btn-red").addEventListener("click", () => withParent(() => openCardSheet("red")));
+  $("#btn-good").addEventListener("click", () => withParent(openGoodSheet));
+  $("#btn-history").addEventListener("click", openHistory);
+  $("#btn-settings").addEventListener("click", () => {
+    if (isDemo()) { openChildSheet(null, { onboarding: true }); return; }
+    withParent(openSettings);
+  });
+  $("#btn-start").addEventListener("click", () => openChildSheet(null, { onboarding: true }));
+  $("#parent-pill").addEventListener("click", lock);
+  $("#kids").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-kid]");
+    if (chip) { selectChild(chip.dataset.kid); return; }
+    if (e.target.closest("[data-add-kid]")) withParent(() => openChildSheet(null));
+  });
+
+  // Tageswechsel: um Mitternacht und beim Zurückkehren in die App neu rendern
+  setInterval(() => { if (todayStr() !== lastDate && !animating) render({ rebuild: true }); }, 20_000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && todayStr() !== lastDate) render({ rebuild: true }); });
+
+  demo = makeDemo();
+  render({ rebuild: true });
+  connectStore();
+})();
+</script>
