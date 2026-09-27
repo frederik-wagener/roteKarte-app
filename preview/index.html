@@ -176,6 +176,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
 .animate-loss .goal-group { animation: shake 0.5s ease 0.9s; }
 
 .overflow-badge rect { fill: var(--yellow); }
+.red-slot { opacity: 0; transition: opacity 0.15s; }
+.red-slot.shown { opacity: 1; }
+.red-slot rect { fill: var(--red); stroke: rgba(0, 0, 0, 0.2); stroke-width: 1.5; }
+.red-slot text { fill: #fff; font-family: var(--font-display); font-weight: 800; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+.red-slot .station-inner { transform-box: fill-box; transform-origin: center; }
+.red-slot.pop .station-inner { animation: pop 0.45s cubic-bezier(.3, 1.6, .5, 1); }
 .overflow-badge text { fill: var(--yellow-ink); font-weight: 800; font-size: 12px; text-anchor: middle; dominant-baseline: central; }
 
 .runner { transition: transform 0.65s cubic-bezier(.3, 1.3, .5, 1); }
@@ -534,8 +540,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       }
     }
     const stars = ordered.filter((e) => e.kind === "good").length;
+    const reds = ordered.filter((e) => e.kind === "red").length;
     return {
-      limit, ordered, active, outcomes, loss, lostBy, stars,
+      limit, ordered, active, outcomes, loss, lostBy, stars, reds,
       filled: Math.min(active.length, limit),
       overflow: Math.max(0, active.length - limit),
       remaining: loss ? 0 : limit - active.length,
@@ -759,7 +766,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   // ---------- Roadmap (SVG) ----------
   const road = $("#road");
   const NS = "http://www.w3.org/2000/svg";
-  const PATH_D = "M 40 226 C 130 256, 262 226, 246 170 C 232 124, 84 150, 92 100 C 100 58, 214 74, 292 62";
+  const PATH_D = "M 40 226 C 130 256, 262 226, 246 170 C 232 124, 84 150, 92 100 C 100 58, 196 84, 268 72";
   let geo = null; // { key, len, stations:[{x,y}], goal:{x,y} }
 
   function svgEl(tag, attrs = {}, parent) {
@@ -792,6 +799,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       svgEl("rect", { x: -15, y: -20, width: 30, height: 40, rx: 5 }, inner);
       const t = svgEl("text", { x: 0, y: 1 }, inner); t.textContent = i + 1;
     }
+    const redAt = len - 64;
+    const rp = base.getPointAtLength(redAt);
+    const red = svgEl("g", { class: "red-slot", id: "red-slot", transform: `translate(${rp.x} ${rp.y}) rotate(10)` }, road);
+    const redInner = svgEl("g", { class: "station-inner" }, red);
+    svgEl("rect", { x: -15, y: -20, width: 30, height: 40, rx: 5 }, redInner);
+    svgEl("text", { x: 0, y: 1, id: "red-count" }, redInner);
     const gp = base.getPointAtLength(goalLen);
     const goal = svgEl("g", { class: "goal-group", id: "goal", transform: `translate(${gp.x} ${gp.y})` }, road);
     svgEl("circle", { r: 36, class: "goal-ring" }, goal);
@@ -812,11 +825,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     svgEl("circle", { r: 16, cy: -2, class: "runner-plate" }, body);
     const re = svgEl("text", { y: -1, class: "runner-emoji" }, body); re.textContent = child.avatar;
 
-    geo = { key: `${child.id}|${n}|${child.rewardEmoji}|${child.avatar}|${child.rewardName}`, len, stations, goal: { x: gp.x, y: gp.y } };
+    geo = { key: `${child.id}|${n}|${child.rewardEmoji}|${child.avatar}|${child.rewardName}`, len, stations, goal: { x: gp.x, y: gp.y }, red: { x: rp.x, y: rp.y, at: redAt } };
   }
 
   function runnerPos(st, hideLoss = false) {
-    if (st.loss && !hideLoss) return { x: geo.goal.x - 34, y: geo.goal.y + 22, at: geo.len };
+    if (st.loss && !hideLoss) return { x: geo.red.x - 4, y: geo.red.y + 44, at: geo.red.at };
     if (st.filled === 0) { const p = { x: 40, y: 226 }; return { x: p.x + 2, y: p.y - 26, at: 0 }; }
     const s = geo.stations[st.filled - 1];
     return { x: s.x, y: s.y - 38, at: s.at };
@@ -840,6 +853,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       g.classList.toggle("filled", i < st.filled);
       g.classList.toggle("pop", popIndex === i);
     });
+    const redSlot = $("#red-slot");
+    redSlot.classList.toggle("shown", st.reds > 0);
+    redSlot.classList.remove("pop");
+    if (opts.popRed) { redSlot.getBoundingClientRect(); redSlot.classList.add("pop"); }
+    $("#red-count").textContent = st.reds > 1 ? `${st.reds}×` : "";
     const showLoss = !!st.loss && !opts.hideLoss;
     const pos = runnerPos(st, opts.hideLoss);
     const runner = $("#runner");
@@ -960,7 +978,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         { transform: T(c.x, c.y, w, h, 1.7, "rotate(-7deg)"), offset: 0.42 },
         { transform: T(c.x, c.y, w, h, 1.7, "rotate(6deg)"), offset: 0.54 },
         { transform: T(c.x, c.y, w, h, 1.7, "rotate(0deg)"), offset: 0.62 },
-        { transform: T(target.x, target.y, w, h, 0.45, "rotate(-35deg)"), offset: 1 },
+        { transform: T(target.x, target.y, w, h, ts, "rotate(10deg)"), offset: 1 },
       ];
     }
     const a = el.animate(frames, { duration: kind === "yellow" ? 1300 : 1900, easing: "cubic-bezier(.45,.05,.35,1)", fill: "forwards" });
@@ -1222,7 +1240,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         sfx.plop();
       } else if (kind === "red") {
         sfx.whistle(); buzz([60, 40, 60]);
-        if (motionOK()) { redFlash(); await flyCard("red", center($("#goal"))); }
+        if (motionOK()) { redFlash(); await flyCard("red", center($("#red-slot"))); }
       } else {
         sfx.sparkle();
         const o = after.outcomes[ev.id];
@@ -1246,7 +1264,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     if (justLost && motionOK()) {
       animating = true;
       try {
-        render({ pop, hop: kind === "yellow", hideLoss: true });
+        render({ pop, popRed: kind === "red", hop: kind === "yellow", hideLoss: true });
         await sleep(kind === "yellow" ? 700 : 150);
         await lossShow(child, after.loss);
       } finally {
@@ -1254,7 +1272,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       }
       render({ justLost: true });
     } else {
-      render({ pop, hop: kind !== "red" && !after.loss, justLost });
+      render({ pop, popRed: kind === "red", hop: kind !== "red" && !after.loss, justLost });
       if (justLost) { setTimeout(() => { sfx.sad(); buzz([100, 60, 160]); }, 700); }
     }
     if (kind === "good") { const b = $("#star-bank"); b.classList.remove("bump"); b.getBoundingClientRect(); b.classList.add("bump"); }
