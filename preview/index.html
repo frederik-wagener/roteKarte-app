@@ -1139,6 +1139,73 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     toast(`Neuer Start für ${child.name}! ${child.rewardEmoji}`);
   }
 
+  // Sicherung als Text-Code (zum Kopieren in Notizen/WhatsApp und wieder Einfügen)
+  function backupCode() {
+    const json = JSON.stringify({ v: 1, children: data.children, days: data.days, settings: data.settings });
+    return "RK1:" + btoa(unescape(encodeURIComponent(json)));
+  }
+  function parseBackup(text) {
+    const m = String(text).trim().match(/^RK1:([A-Za-z0-9+/=\s]+)$/);
+    if (!m) return null;
+    try {
+      const obj = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/\s/g, "")))));
+      if (!obj || typeof obj.children !== "object" || typeof obj.days !== "object") return null;
+      return obj;
+    } catch { return null; }
+  }
+  function restoreBackup(obj) {
+    if (storeMode === "db") {
+      Object.keys(data.children).filter((id) => !obj.children[id]).forEach((id) => chain(`children/${id}`, () => db.doc(`children/${id}`).delete()));
+      Object.keys(data.days).filter((k) => !obj.days[k]).forEach((k) => chain(`days/${k}`, () => db.doc(`days/${k}`).delete()));
+    }
+    data.children = obj.children; data.days = obj.days;
+    data.settings = { yellowLimit: 4, sound: true, ...(obj.settings || {}) };
+    if (storeMode === "db") {
+      Object.values(data.children).forEach(persistChild);
+      Object.keys(data.days).forEach(persistDay);
+      persistSettings();
+    } else saveLocal();
+    closeSheet(); render({ rebuild: true });
+    toast(`Wiederhergestellt: ${Object.keys(data.children).length} Kind(er)`);
+  }
+  function openBackupSheet() {
+    const code = isDemo() ? "" : backupCode();
+    const sheet = openSheet(`
+      <div class="sheet-head"><h2>Sicherung</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
+      <p class="muted">Der Browser kann gespeicherte Daten löschen, zum Beispiel beim Aufräumen von Safari. Kopiert euch ab und zu den Code, etwa in die Notizen-App. Damit lässt sich alles wiederherstellen, auch auf einem anderen Gerät.</p>
+      <h3>Sichern</h3>
+      ${code ? `<button class="btn primary" id="b-copy">Code kopieren</button>
+      <textarea class="input" id="b-code" rows="3" readonly hidden>${esc(code)}</textarea>` : `<p class="note">Legt zuerst euer Kind an – im Beispiel-Modus gibt es noch nichts zu sichern.</p>`}
+      <h3>Wiederherstellen</h3>
+      <div class="field"><label for="b-in">Code einfügen</label><textarea class="input" id="b-in" rows="3" placeholder="RK1:…" autocomplete="off"></textarea></div>
+      <div class="form-msg" id="b-msg"></div>
+      <button class="btn" id="b-restore">Wiederherstellen</button>
+    `, { tall: true, label: "Sicherung" });
+    $("#b-copy", sheet)?.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.textContent = "Kopiert ✓";
+      } catch {
+        const ta = $("#b-code", sheet); ta.hidden = false; ta.focus(); ta.select();
+        btn.textContent = "Code markiert – jetzt kopieren";
+      }
+    });
+    $("#b-restore", sheet).addEventListener("click", (e) => {
+      const btn = e.currentTarget;
+      const obj = parseBackup($("#b-in", sheet).value);
+      const msg = $("#b-msg", sheet);
+      if (!obj) { msg.textContent = "Das ist kein gültiger Sicherungs-Code."; return; }
+      const n = Object.keys(obj.children).length;
+      if (btn.dataset.sure !== "1") {
+        btn.dataset.sure = "1"; btn.className = "btn red";
+        btn.textContent = `${n} Kind(er) wiederherstellen und aktuelle Daten ersetzen?`;
+        msg.textContent = ""; return;
+      }
+      restoreBackup(obj);
+    });
+  }
+
   async function resetAll() {
     if (storeMode === "db") {
       Object.keys(data.children).forEach((id) => chain(`children/${id}`, () => db.doc(`children/${id}`).delete()));
@@ -1377,6 +1444,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         <div class="stepper"><button id="lim-dec" aria-label="Weniger">−</button><output id="lim">${limit()}</output><button id="lim-inc" aria-label="Mehr">+</button></div></div>
       <div class="list-item"><div class="grow"><div class="title">Töne</div><div class="sub">Pfiff, Plopp und Glitzern</div></div>
         <button class="switch" role="switch" id="snd" aria-checked="${!!data.settings.sound}" aria-label="Töne"></button></div>
+      <h3>Sicherung</h3>
+      <button class="btn" id="s-backup">Daten sichern oder wiederherstellen</button>
       <h3>Zurücksetzen</h3>
       <button class="btn" id="s-reset-day">Heutigen Tag von ${esc(currentChild().name)} neu starten</button>
       <button class="btn danger" id="s-reset-all">Alles löschen</button>
@@ -1395,6 +1464,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     $("#snd", sheet).addEventListener("click", (e) => {
       data.settings.sound = !data.settings.sound; e.currentTarget.setAttribute("aria-checked", String(data.settings.sound)); persistSettings();
     });
+    $("#s-backup", sheet).addEventListener("click", openBackupSheet);
     $("#s-reset-day", sheet).addEventListener("click", openResetDaySheet);
     $("#s-reset-all", sheet).addEventListener("click", (e) => {
       const btn = e.currentTarget;
@@ -1501,5 +1571,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   demo = makeDemo();
   render({ rebuild: true });
   connectStore();
+  // Den Browser bitten, die Daten nicht automatisch aufzuräumen
+  try { navigator.storage?.persist?.().catch(() => {}); } catch {}
 })();
 </script>
