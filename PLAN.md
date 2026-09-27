@@ -155,27 +155,29 @@ Barrierefreiheit: bei „Bewegung reduzieren" (`accessibilityReduceMotion`) einf
 
 @Model class CardEvent {
     var id: UUID
-    var type: EventType       // .yellow, .red, .goodDeed
+    var kind: CardKind        // .yellow, .red, .goodDeed
     var timestamp: Date
     var day: Date             // Kalendertag (startOfDay) – für schnelle Abfragen
     var reason: String?
-    var cancelledBy: UUID?    // gute Tat, die diese gelbe Karte gestrichen hat
     var child: Child?
 }
 
-enum EventType: String, Codable { case yellow, red, goodDeed }
+enum CardKind: String, Codable { case yellow, red, goodDeed }
 
 struct Rules: Codable {       // in UserDefaults / AppStorage
     var yellowLimit = 4
 }
 ```
 
-Karten werden nie gelöscht, sondern nur als gestrichen markiert → vollständiger Verlauf bleibt erhalten, Rückgängig-Funktion ist einfach.
+Gespeichert werden nur die Ereignisse selbst. Welche gelbe Karte durch welche gute Tat gestrichen ist, berechnet die `RuleEngine` bei jeder Auswertung aus der chronologischen Reihenfolge – so kann der Zustand nie inkonsistent werden, und „Rückgängig" ist einfach das Löschen eines Ereignisses.
+
+Die Spielregeln liegen im Swift-Paket `Packages/RoteKarteCore` (ohne SwiftUI/SwiftData) und werden dort getestet.
 
 ### Projektstruktur
 
 ```
 RoteKarte/
+├── Packages/RoteKarteCore/  RuleEngine, DayState, Rules, StatusText + Tests
 ├── App/                RoteKarteApp.swift, AppState
 ├── Models/             Child, CardEvent, EventType, Rules
 ├── Services/           RuleEngine, DayProvider (Tageswechsel), ParentLock (PIN/Face ID), HapticsService, SoundService

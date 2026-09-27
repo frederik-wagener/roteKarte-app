@@ -1,0 +1,430 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		062E6311A62C4D67C3118AAE /* Child.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE69804C8F3CEB3946D6614 /* Child.swift */; };
+		2BF5ECB9D4BD3D4B531D61F9 /* RoteKarteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FD9A709F66FB87AA9DCA51 /* RoteKarteApp.swift */; };
+		8D3CF66AFE28802AB9D9269D /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618ADA91C658FC387DF83F68 /* Color+Hex.swift */; };
+		ADD9992EF1DE74365074F4C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3117B1F8ECA602F25085309B /* Assets.xcassets */; };
+		CAFCA5E40D6C97AF934701F3 /* RoteKarteCore in Frameworks */ = {isa = PBXBuildFile; productRef = F564D13D486F10E68414C4F2 /* RoteKarteCore */; };
+		F777ED5430885AF77C28EFFD /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAAC2CBC9495611857D50E2 /* TodayView.swift */; };
+		F9C408126E63F6698C1F2785 /* CardEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D6BB1B2EB7F0B6485443F1 /* CardEvent.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		27FD9A709F66FB87AA9DCA51 /* RoteKarteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoteKarteApp.swift; sourceTree = "<group>"; };
+		3117B1F8ECA602F25085309B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3BE69804C8F3CEB3946D6614 /* Child.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Child.swift; sourceTree = "<group>"; };
+		618ADA91C658FC387DF83F68 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		6B22058BDBC3FA35FFD73E87 /* RoteKarteCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RoteKarteCore; path = Packages/RoteKarteCore; sourceTree = SOURCE_ROOT; };
+		C7D6BB1B2EB7F0B6485443F1 /* CardEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEvent.swift; sourceTree = "<group>"; };
+		DEAAC2CBC9495611857D50E2 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		E0705B4836F9D04BD80169E1 /* RoteKarte.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RoteKarte.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EC227CCC83F849E6FC765392 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAFCA5E40D6C97AF934701F3 /* RoteKarteCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2A863647E3F070DD94D63896 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				27FD9A709F66FB87AA9DCA51 /* RoteKarteApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		539DF5E5D852CF9ADCAF104B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E0705B4836F9D04BD80169E1 /* RoteKarte.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		65E044453540A310E2FD3A77 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				618ADA91C658FC387DF83F68 /* Color+Hex.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		7F3F7491CEB7D84FA06009A3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				C7D6BB1B2EB7F0B6485443F1 /* CardEvent.swift */,
+				3BE69804C8F3CEB3946D6614 /* Child.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		932795DDC4D422994880EA34 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				6B22058BDBC3FA35FFD73E87 /* RoteKarteCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		E6D1635F8EC5993BE31D4791 = {
+			isa = PBXGroup;
+			children = (
+				932795DDC4D422994880EA34 /* Packages */,
+				E7E5FC9E570C51E546F511FF /* RoteKarte */,
+				539DF5E5D852CF9ADCAF104B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E7E5FC9E570C51E546F511FF /* RoteKarte */ = {
+			isa = PBXGroup;
+			children = (
+				2A863647E3F070DD94D63896 /* App */,
+				F79F4F99D00556E087696E14 /* Features */,
+				7F3F7491CEB7D84FA06009A3 /* Models */,
+				EBCAB3507CEB48A27D6868D8 /* Resources */,
+				65E044453540A310E2FD3A77 /* Support */,
+			);
+			path = RoteKarte;
+			sourceTree = "<group>";
+		};
+		E9E85486CE079151F1AE49BD /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				DEAAC2CBC9495611857D50E2 /* TodayView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		EBCAB3507CEB48A27D6868D8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3117B1F8ECA602F25085309B /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		F79F4F99D00556E087696E14 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				E9E85486CE079151F1AE49BD /* Today */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E36FD005CE6948E4F20F4A3B /* RoteKarte */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FC480C1270B3D11D5B52607D /* Build configuration list for PBXNativeTarget "RoteKarte" */;
+			buildPhases = (
+				FA9783E6A1567BF769D168BE /* Sources */,
+				7E9F4F318DCE248C4C477804 /* Resources */,
+				EC227CCC83F849E6FC765392 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RoteKarte;
+			packageProductDependencies = (
+				F564D13D486F10E68414C4F2 /* RoteKarteCore */,
+			);
+			productName = RoteKarte;
+			productReference = E0705B4836F9D04BD80169E1 /* RoteKarte.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		91A2C1EAB2BCFA5603C9DA84 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					E36FD005CE6948E4F20F4A3B = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 5C7608231180D843E06004E8 /* Build configuration list for PBXProject "RoteKarte" */;
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				de,
+			);
+			mainGroup = E6D1635F8EC5993BE31D4791;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				94D99970AEB310CD8C45079B /* XCLocalSwiftPackageReference "Packages/RoteKarteCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 539DF5E5D852CF9ADCAF104B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E36FD005CE6948E4F20F4A3B /* RoteKarte */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7E9F4F318DCE248C4C477804 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADD9992EF1DE74365074F4C2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FA9783E6A1567BF769D168BE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9C408126E63F6698C1F2785 /* CardEvent.swift in Sources */,
+				062E6311A62C4D67C3118AAE /* Child.swift in Sources */,
+				8D3CF66AFE28802AB9D9269D /* Color+Hex.swift in Sources */,
+				2BF5ECB9D4BD3D4B531D61F9 /* RoteKarteApp.swift in Sources */,
+				F777ED5430885AF77C28EFFD /* TodayView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AFD8FEDCCD59FB27C2F5D58D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Rote Karte";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.kids";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.rotekarte;
+				PRODUCT_NAME = RoteKarte;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B25AF4F1FB4DF6D955AD1387 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		BFCC8ECC41BBDB37CF96921B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Rote Karte";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.kids";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.rotekarte;
+				PRODUCT_NAME = RoteKarte;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F791F0D775CA4DA8B3EA26AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5C7608231180D843E06004E8 /* Build configuration list for PBXProject "RoteKarte" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F791F0D775CA4DA8B3EA26AF /* Debug */,
+				B25AF4F1FB4DF6D955AD1387 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FC480C1270B3D11D5B52607D /* Build configuration list for PBXNativeTarget "RoteKarte" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFCC8ECC41BBDB37CF96921B /* Debug */,
+				AFD8FEDCCD59FB27C2F5D58D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		94D99970AEB310CD8C45079B /* XCLocalSwiftPackageReference "Packages/RoteKarteCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RoteKarteCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F564D13D486F10E68414C4F2 /* RoteKarteCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RoteKarteCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 91A2C1EAB2BCFA5603C9DA84 /* Project object */;
+}

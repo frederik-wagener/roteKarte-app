@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core-tests:
+    name: Spielregeln (swift test)
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests ausführen
+        working-directory: Packages/RoteKarteCore
+        run: swift test
+
+  build-app:
+    name: App bauen (iOS Simulator)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode-Version
+        run: xcodebuild -version
+      - name: Bauen
+        run: |
+          xcodebuild build \
+            -project RoteKarte.xcodeproj \
+            -scheme RoteKarte \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
