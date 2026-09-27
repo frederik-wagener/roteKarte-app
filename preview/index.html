@@ -102,15 +102,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   display: grid; place-items: center; font-size: 20px; flex: none;
 }
 
-.parent-pill {
-  align-self: center;
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 0; border-radius: 999px; padding: 4px 12px;
-  background: var(--ink); color: var(--bg);
-  font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
-}
-
-.parent-pill[hidden] { display: none; }
 .demo-banner {
   display: flex; gap: 12px; align-items: center; justify-content: space-between;
   background: var(--surface); border: 2px dashed var(--line); border-radius: var(--radius);
@@ -217,7 +208,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
 .act.good { grid-column: 1 / -1; background: var(--good); color: var(--good-ink); }
 .act .mini-card { width: 18px; height: 25px; border-radius: 3px; background: currentColor; opacity: 0.9; transform: rotate(-8deg); }
 .act.yellow .mini-card { background: var(--yellow-ink); opacity: 0.85; }
-.act .lock { position: absolute; right: 10px; top: 8px; font-size: 13px; opacity: 0.8; }
 
 /* Tagesverlauf */
 .log h2, .sheet h2, .sheet h3 { font-family: var(--font-display); margin: 0; line-height: 1.2; }
@@ -326,19 +316,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
 .reward-opt span { font-size: 28px; }
 .reward-opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink) inset; }
 
-/* PIN */
-.pin-dots { display: flex; justify-content: center; gap: 16px; padding-block: 8px; }
-.pin-dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); }
-.pin-dots i.on { background: var(--ink); }
-.pin-dots.error { animation: shake 0.4s; }
-.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; margin: 0 auto; width: 100%; }
-.pin-key {
-  border: 0; background: var(--surface); border-radius: 50%; aspect-ratio: 1;
-  font-family: var(--font-display); font-size: 28px; font-weight: 700;
-  box-shadow: var(--shadow);
-}
-.pin-key.ghost { background: none; box-shadow: none; font-size: 22px; }
-.pin-msg { text-align: center; min-height: 1.4em; color: var(--red); font-weight: 700; font-size: 14px; }
+.form-msg { text-align: center; min-height: 1.4em; color: var(--red); font-weight: 700; font-size: 14px; }
 
 /* Einstellungen */
 .list { display: flex; flex-direction: column; gap: 8px; }
@@ -445,8 +423,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     <button class="icon-btn" id="btn-settings" aria-label="Einstellungen">⚙️</button>
   </header>
 
-  <button class="parent-pill" id="parent-pill" hidden></button>
-
   <div class="demo-banner" id="demo-banner" hidden>
     <span><strong>Beispiel-Tag.</strong> Probier alles aus – gespeichert wird erst, wenn ihr euer Kind anlegt.</span>
     <button class="btn small primary" id="btn-start">Loslegen</button>
@@ -461,9 +437,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   <p class="status" id="status" aria-live="polite"></p>
 
   <div class="actions">
-    <button class="act yellow" id="btn-yellow"><span class="mini-card"></span>Gelbe Karte<span class="lock" aria-hidden="true"></span></button>
-    <button class="act red" id="btn-red"><span class="mini-card"></span>Rote Karte<span class="lock" aria-hidden="true"></span></button>
-    <button class="act good" id="btn-good">⭐ <span id="good-label">Gute Tat</span><span class="lock" aria-hidden="true"></span></button>
+    <button class="act yellow" id="btn-yellow"><span class="mini-card"></span>Gelbe Karte</button>
+    <button class="act red" id="btn-red"><span class="mini-card"></span>Rote Karte</button>
+    <button class="act good" id="btn-good">⭐ <span id="good-label">Gute Tat</span></button>
   </div>
 
   <section class="log" aria-labelledby="log-title">
@@ -495,7 +471,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   ];
   const REASONS_BAD = ["Hauen", "Nicht zuhören", "Schreien", "Frech sein", "Streiten", "Lügen"];
   const REASONS_GOOD = ["Aufgeräumt", "Geteilt", "Geholfen", "Lieb gewesen", "Tapfer", "Getröstet"];
-  const UNLOCK_MS = 60_000;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
   // ---------- Hilfsfunktionen ----------
@@ -558,7 +533,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   }
 
   // ---------- Daten ----------
-  const data = { children: {}, settings: { yellowLimit: 4, sound: true, pinHash: null }, days: {} };
+  const data = { children: {}, settings: { yellowLimit: 4, sound: true }, days: {} };
   let demo = null; // Beispiel-Daten, solange noch kein Kind angelegt ist
   let storeMode = "memory"; // "db" | "local" | "memory"
   let db = null;
@@ -676,53 +651,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       data.days = next; first.days = true; requestRender(firstLoad());
     }, () => {});
     db.doc("settings/main").onSnapshot((snap) => {
-      if (snap.exists) data.settings = { yellowLimit: 4, sound: true, pinHash: null, ...snap.data() };
+      if (snap.exists) data.settings = { yellowLimit: 4, sound: true, ...snap.data() };
       first.settings = true; requestRender(firstLoad());
     }, () => {});
   }
 
-  // ---------- Eltern-Modus (PIN) ----------
-  let unlockedUntil = 0;
-  let pillTimer = null;
-  const needsPin = () => !isDemo() && !!data.settings.pinHash;
-  const isUnlocked = () => !needsPin() || Date.now() < unlockedUntil;
-
-  async function hashPin(pin) {
-    const text = "rotekarte:" + pin;
-    try {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-      return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-    } catch {
-      let h = 5381; for (const c of text) h = ((h << 5) + h + c.charCodeAt(0)) | 0; return "djb" + (h >>> 0).toString(16);
-    }
-  }
-
-  function withParent(action) {
-    if (isUnlocked()) { if (needsPin()) unlock(); action(); return; }
-    openPinSheet({
-      title: "Eltern-PIN",
-      subtitle: "Karten geben und Einstellungen nur für Eltern.",
-      onPin: async (pin) => {
-        if ((await hashPin(pin)) !== data.settings.pinHash) return "Falscher PIN.";
-        unlock(); closeSheet(); setTimeout(action, 180); return null;
-      },
-      forgot: true,
-    });
-  }
-  function unlock() { unlockedUntil = Date.now() + UNLOCK_MS; updateParentUI(); }
-  function lock() { unlockedUntil = 0; updateParentUI(); }
-  function updateParentUI() {
-    const pill = $("#parent-pill");
-    const open = needsPin() && Date.now() < unlockedUntil;
-    pill.hidden = !open;
-    if (open) {
-      const s = Math.ceil((unlockedUntil - Date.now()) / 1000);
-      pill.textContent = `🔓 Eltern-Modus · noch ${s} s · sperren`;
-      if (!pillTimer) pillTimer = setInterval(updateParentUI, 1000);
-    } else if (pillTimer) { clearInterval(pillTimer); pillTimer = null; }
-    const icon = needsPin() ? (open ? "🔓" : "🔒") : "";
-    document.querySelectorAll(".act .lock").forEach((el) => { el.textContent = icon; });
-  }
 
   // ---------- Töne ----------
   let audio = null;
@@ -940,7 +873,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         </li>`;
       }).join("");
     }
-    updateParentUI();
   }
 
   // ---------- Animationen ----------
@@ -1211,9 +1143,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
       Object.keys(data.days).forEach((k) => chain(`days/${k}`, () => db.doc(`days/${k}`).delete()));
       chain("settings/main", () => db.doc("settings/main").delete());
     }
-    data.children = {}; data.days = {}; data.settings = { yellowLimit: 4, sound: true, pinHash: null };
+    data.children = {}; data.days = {}; data.settings = { yellowLimit: 4, sound: true };
     if (storeMode !== "db") { try { localStorage.removeItem("rk-data"); } catch {} }
-    demo = makeDemo(); lock();
+    demo = makeDemo();
     closeSheet(); render({ rebuild: true });
     toast("Alles zurückgesetzt – wieder im Beispiel-Modus.");
   }
@@ -1302,7 +1234,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     const host = $("#toast-host");
     clearTimeout(toastTimer);
     host.innerHTML = `<div class="toast" role="status"><span>${esc(text)}</span>${actionLabel ? `<button type="button">${esc(actionLabel)}</button>` : ""}</div>`;
-    if (actionLabel) $("button", host).addEventListener("click", () => { host.innerHTML = ""; withParent(action); });
+    if (actionLabel) $("button", host).addEventListener("click", () => { host.innerHTML = ""; action(); });
     toastTimer = setTimeout(() => { host.innerHTML = ""; }, 6000);
   }
 
@@ -1369,75 +1301,13 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     $("#confirm", sheet).addEventListener("click", () => { const r = input.value.trim(); closeSheet(); setTimeout(() => commitEvent("good", r), 120); });
   }
 
-  // PIN-Eingabe
-  function openPinSheet({ title, subtitle, onPin, forgot = false, cancelable = true }) {
-    const sheet = openSheet(`
-      <div class="sheet-head"><h2>${esc(title)}</h2>${cancelable ? `<button class="close-btn" data-close aria-label="Schließen">✕</button>` : ""}</div>
-      <p class="muted">${esc(subtitle)}</p>
-      <div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>
-      <div class="pin-msg" id="pin-msg"></div>
-      <div class="pin-pad">
-        ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button class="pin-key" data-k="${n}">${n}</button>`).join("")}
-        <span></span><button class="pin-key" data-k="0">0</button><button class="pin-key ghost" data-k="del" aria-label="Löschen">⌫</button>
-      </div>
-      ${forgot ? `<button class="link-btn" id="forgot">PIN vergessen?</button>` : ""}
-    `, { label: title });
-    let pin = "";
-    const dots = $("#dots", sheet);
-    const msg = $("#pin-msg", sheet);
-    const show = () => dots.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i < pin.length));
-    const press = async (k) => {
-      if (k === "del") { pin = pin.slice(0, -1); show(); return; }
-      if (pin.length >= 4) return;
-      pin += k; show(); msg.textContent = "";
-      if (pin.length === 4) {
-        const err = await onPin(pin);
-        if (err) { msg.textContent = err; dots.classList.remove("error"); dots.getBoundingClientRect(); dots.classList.add("error"); buzz(80); pin = ""; setTimeout(show, 250); }
-      }
-    };
-    sheet.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => press(b.dataset.k)));
-    sheet.addEventListener("keydown", (e) => { if (/^[0-9]$/.test(e.key)) press(e.key); if (e.key === "Backspace") press("del"); });
-    $("#forgot", sheet)?.addEventListener("click", openForgotSheet);
-  }
-
-  function openNewPinSheet(after) {
-    let first = null;
-    const step = () => openPinSheet({
-      title: first ? "PIN wiederholen" : "Neuen PIN festlegen",
-      subtitle: first ? "Bitte den PIN noch einmal eingeben." : "4 Ziffern. Damit können nur Eltern Karten geben.",
-      onPin: async (pin) => {
-        if (!first) { first = pin; step(); return null; }
-        if (pin !== first) { first = null; setTimeout(step, 400); return "Die PINs stimmen nicht überein."; }
-        data.settings.pinHash = await hashPin(pin);
-        persistSettings();
-        unlock(); closeSheet(); after?.(); return null;
-      },
-    });
-    step();
-  }
-
-  function openForgotSheet() {
-    const a = 12 + Math.floor(Math.random() * 8), b = 13 + Math.floor(Math.random() * 16);
-    const sheet = openSheet(`
-      <div class="sheet-head"><h2>PIN vergessen</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
-      <p>Aufgabe für Erwachsene: Wie viel ist <strong>${a} × ${b}</strong>?</p>
-      <div class="field"><label for="answer">Ergebnis</label><input class="input" id="answer" inputmode="numeric" autocomplete="off"></div>
-      <div class="pin-msg" id="ans-msg"></div>
-      <button class="btn primary" id="check">Prüfen</button>
-    `, { label: "PIN vergessen" });
-    $("#check", sheet).addEventListener("click", () => {
-      if (Number($("#answer", sheet).value) === a * b) openNewPinSheet(() => toast("Neuer PIN gespeichert"));
-      else $("#ans-msg", sheet).textContent = "Das stimmt leider nicht.";
-    });
-  }
-
   // Kind anlegen / bearbeiten
   function openChildSheet(existing, { onboarding = false } = {}) {
     const c = existing ? { ...existing } : { id: uid(), name: "", avatar: "👧", color: COLORS[children().length % COLORS.length], rewardName: "Eis", rewardEmoji: "🍦", createdAt: Date.now() };
     const presetIdx = REWARDS.findIndex((r) => r.emoji === c.rewardEmoji && r.name === c.rewardName);
     const sheet = openSheet(`
       <div class="sheet-head"><h2>${onboarding ? "Euer Kind" : existing ? "Kind bearbeiten" : "Kind hinzufügen"}</h2><button class="close-btn" data-close aria-label="Schließen">✕</button></div>
-      ${onboarding ? `<p class="muted">Danach legt ihr einen Eltern-PIN fest. Das Beispiel verschwindet dann.</p>` : ""}
+      ${onboarding ? `<p class="muted">Danach verschwindet das Beispiel und ihr startet mit einem leeren Tag.</p>` : ""}
       <div class="field"><label for="c-name">Name</label><input class="input" id="c-name" maxlength="20" value="${esc(c.name)}" placeholder="z. B. Mia" autocomplete="off"></div>
       <h3>Avatar</h3>
       <div class="emoji-grid">${AVATARS.map((a) => `<button type="button" class="emoji-opt" data-av="${a}" aria-pressed="${a === c.avatar}">${a}</button>`).join("")}</div>
@@ -1449,7 +1319,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         <div class="field" style="flex:0 0 84px"><label for="c-remoji">Emoji</label><input class="input" id="c-remoji" maxlength="4" value="${esc(c.rewardEmoji)}"></div>
         <div class="field"><label for="c-rname">Eigene Belohnung</label><input class="input" id="c-rname" maxlength="30" value="${esc(c.rewardName)}"></div>
       </div>
-      <div class="pin-msg" id="c-msg"></div>
+      <div class="form-msg" id="c-msg"></div>
       <button class="btn primary" id="c-save">${onboarding ? "Weiter" : "Speichern"}</button>
       ${existing && children().length > 1 ? `<button class="btn danger" id="c-del">Kind löschen</button>` : ""}
     `, { tall: true, label: "Kind" });
@@ -1475,9 +1345,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         try { localStorage.setItem("rk-current", c.id); } catch {}
         render({ rebuild: true });
       };
-      if (onboarding) {
-        openNewPinSheet(() => { save(); toast(`Los geht's, ${c.name}! ${c.rewardEmoji}`); });
-      } else { save(); closeSheet(); }
+      save(); closeSheet();
+      if (onboarding) toast(`Los geht's, ${c.name}! ${c.rewardEmoji}`);
     });
     $("#c-del", sheet)?.addEventListener("click", (e) => {
       const btn = e.currentTarget;
@@ -1506,8 +1375,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
         <div class="stepper"><button id="lim-dec" aria-label="Weniger">−</button><output id="lim">${limit()}</output><button id="lim-inc" aria-label="Mehr">+</button></div></div>
       <div class="list-item"><div class="grow"><div class="title">Töne</div><div class="sub">Pfiff, Plopp und Glitzern</div></div>
         <button class="switch" role="switch" id="snd" aria-checked="${!!data.settings.sound}" aria-label="Töne"></button></div>
-      <h3>Eltern</h3>
-      <button class="btn" id="s-pin">PIN ändern</button>
       <h3>Zurücksetzen</h3>
       <button class="btn" id="s-reset-day">Heutigen Tag von ${esc(currentChild().name)} neu starten</button>
       <button class="btn danger" id="s-reset-all">Alles löschen</button>
@@ -1526,11 +1393,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
     $("#snd", sheet).addEventListener("click", (e) => {
       data.settings.sound = !data.settings.sound; e.currentTarget.setAttribute("aria-checked", String(data.settings.sound)); persistSettings();
     });
-    $("#s-pin", sheet).addEventListener("click", () => openNewPinSheet(() => toast("Neuer PIN gespeichert")));
     $("#s-reset-day", sheet).addEventListener("click", openResetDaySheet);
     $("#s-reset-all", sheet).addEventListener("click", (e) => {
       const btn = e.currentTarget;
-      if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Wirklich alle Kinder, Karten und den PIN löschen?"; return; }
+      if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Wirklich alle Kinder und Karten löschen?"; return; }
       resetAll();
     });
   }
@@ -1610,21 +1476,20 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--star); outl
   }
 
   // ---------- Verdrahtung ----------
-  $("#btn-yellow").addEventListener("click", () => withParent(() => openCardSheet("yellow")));
-  $("#btn-red").addEventListener("click", () => withParent(() => openCardSheet("red")));
-  $("#btn-good").addEventListener("click", () => withParent(openGoodSheet));
+  $("#btn-yellow").addEventListener("click", () => openCardSheet("yellow"));
+  $("#btn-red").addEventListener("click", () => openCardSheet("red"));
+  $("#btn-good").addEventListener("click", openGoodSheet);
   $("#btn-history").addEventListener("click", openHistory);
-  $("#btn-reset-day").addEventListener("click", () => withParent(openResetDaySheet));
+  $("#btn-reset-day").addEventListener("click", openResetDaySheet);
   $("#btn-settings").addEventListener("click", () => {
     if (isDemo()) { openChildSheet(null, { onboarding: true }); return; }
-    withParent(openSettings);
+    openSettings();
   });
   $("#btn-start").addEventListener("click", () => openChildSheet(null, { onboarding: true }));
-  $("#parent-pill").addEventListener("click", lock);
   $("#kids").addEventListener("click", (e) => {
     const chip = e.target.closest("[data-kid]");
     if (chip) { selectChild(chip.dataset.kid); return; }
-    if (e.target.closest("[data-add-kid]")) withParent(() => openChildSheet(null));
+    if (e.target.closest("[data-add-kid]")) openChildSheet(null);
   });
 
   // Tageswechsel: um Mitternacht und beim Zurückkehren in die App neu rendern

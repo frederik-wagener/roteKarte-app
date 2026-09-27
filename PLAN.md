@@ -9,7 +9,7 @@ Eine iOS-App für Kinder (und Eltern), die das Verhalten des Tages mit gelben un
 | Kann eine gute Tat das verlorene Eis zurückbringen? | **Nein.** Ist das Eis weg, bleibt es für den Tag weg. |
 | Wie viele Geräte? | **Ein Gerät**, alle Daten lokal. Kein iCloud-Sync. |
 | Mindest-iOS-Version? | **iOS 26** – volle Nutzung von Liquid Glass und aller aktuellen SwiftUI-APIs. |
-| Wer bedient die App? | **Das Kind schaut, die Eltern handeln mit PIN.** |
+| Wer bedient die App? | **Die Eltern – ohne PIN.** Die App ist ein Werkzeug für Eltern, das Kind schaut mit. |
 | Nur Eis als Belohnung? | **Pro Kind wählbar** (Name + Emoji, Standard „Eis 🍦“). |
 
 ---
@@ -52,11 +52,9 @@ func evaluate(events: [CardEvent], rules: Rules) -> DayState
 
 ## 2. Zielgruppe & Bedienkonzept
 
-- **Kinder** schauen sich die Roadmap an – groß, bunt, ohne viel Text. Ohne PIN ist nur Anschauen möglich (Roadmap, Kind wechseln, Verlauf).
-- **Eltern** vergeben Karten und gute Taten – jede Aktion erfordert den **Eltern-PIN** (4 Ziffern).
-- Der PIN wird beim ersten Start im Onboarding festgelegt. Nach Eingabe bleibt der Eltern-Modus 60 Sekunden entsperrt (für mehrere Aktionen hintereinander), dann sperrt er sich automatisch.
-- PIN vergessen → Zurücksetzen über eine Rechenaufgabe für Erwachsene (z. B. „17 × 23“) oder Face ID / Touch ID des Geräts.
-- Einstellungen sind ebenfalls PIN-geschützt.
+- **Eltern** vergeben Karten und gute Taten direkt – **kein PIN**, keine Sperre.
+- **Kinder** schauen sich die Roadmap an – groß, bunt, ohne viel Text.
+- Versehentliche Aktionen lassen sich per „Rückgängig“ zurücknehmen; ein Tag kann komplett neu gestartet werden.
 - **Mehrere Kinder** möglich (Profil mit Name, Farbe, Avatar-Emoji, eigene Belohnung), Wechsel per Wisch oder Avatar-Leiste oben.
 - Alles läuft auf **einem Gerät** (z. B. dem Familien-iPad oder Eltern-iPhone).
 
@@ -73,13 +71,12 @@ func evaluate(events: [CardEvent], rules: Rules) -> DayState
 
          „Noch 2 Karten bis zum Eis-Verbot"
 
-   [ 🟨 Gelbe Karte ] [ 🟥 Rote Karte ]     🔒
+   [ 🟨 Gelbe Karte ] [ 🟥 Rote Karte ]
             [ ⭐ Gute Tat ]
 ```
 - Geschwungener Weg (Pfad als `Path`/Bezier-Kurve) mit 4 Stationen + Belohnungs-Ziel.
 - Leere Station = gestrichelter Rahmen; belegt = gelbe Karte, die mit Animation "einfliegt".
 - Ziel: die Belohnung des Kindes (Emoji groß, fröhlich wackelnd) → bei Verlust: rotes Durchstreichen + Verlust-Animation (beim Eis: „schmilzt“, bei anderen Belohnungen: zerbröselt/verblasst).
-- Aktions-Buttons sind mit Schloss 🔒 markiert; Tippen öffnet zuerst die PIN-Eingabe.
 - Ist die Belohnung verloren, wird der „Gute Tat“-Button zu „⭐ Gute Tat merken“ (nur Verlauf).
 - Kleine Figur (Avatar des Kindes) steht auf der aktuellen Station und hüpft weiter.
 - Unter der Roadmap: kindgerechter Status-Text.
@@ -102,7 +99,7 @@ func evaluate(events: [CardEvent], rules: Rules) -> DayState
 ### 3.5 Einstellungen
 - Kinder verwalten (anlegen, umbenennen, Avatar, Farbe, löschen)
 - **Belohnung pro Kind:** Name + Emoji aus Vorschlägen (🍦 Eis, 📺 Fernsehen, 🍫 Süßes, 🎮 Spielzeit, 📖 Gute-Nacht-Geschichte, 🛝 Spielplatz) oder frei wählbar
-- Eltern-PIN ändern, Face ID / Touch ID als Alternative
+- Tag neu starten / alles löschen
 - Gelbe-Karten-Limit (Standard 4)
 - Grund-Vorschläge bearbeiten
 - Sounds & Haptik an/aus
@@ -118,11 +115,10 @@ func evaluate(events: [CardEvent], rules: Rules) -> DayState
 | Rote Karte | Bildschirm blitzt kurz rot, rote Karte wird wie ein Schiri „hochgehalten" (Karte kommt von unten mit Pfeifen-Sound), dann fliegt sie direkt auf die Belohnung → Durchstreichen. |
 | Gute Tat | Stern mit Partikel-Glitzer (Canvas/`TimelineView` oder `SpriteKit`-Emitter), fliegt auf die letzte gelbe Karte; Karte wird durchgestrichen, kippt und fällt vom Weg. Figur geht eine Station zurück. |
 | Gute Tat (Tag gesperrt) | Stern fliegt in eine kleine „Sternensammlung“ oben rechts – keine Änderung am Weg. |
-| PIN entsperrt | Schloss springt auf, Buttons leuchten kurz auf. |
 | Belohnung erhalten am Abend | Idle-Animation: Belohnung wackelt leicht, Konfetti beim App-Öffnen, wenn der Vortag erfolgreich war. |
 | Tageswechsel | Weg wird „weggefegt" und neu gezeichnet. |
 
-Umsetzung: SwiftUI-Animationen (`withAnimation(.spring)`, `PhaseAnimator`, `KeyframeAnimator`), `Canvas` für Partikel, `sensoryFeedback` für Haptik, animierte SF Symbols (`symbolEffect`) für Schloss, Stern & Buttons, `MeshGradient` für einen lebendigen Himmel-Hintergrund hinter der Roadmap. Optional später Lottie für aufwendige Figuren-Animationen.
+Umsetzung: SwiftUI-Animationen (`withAnimation(.spring)`, `PhaseAnimator`, `KeyframeAnimator`), `Canvas` für Partikel, `sensoryFeedback` für Haptik, animierte SF Symbols (`symbolEffect`) für Stern & Buttons, `MeshGradient` für einen lebendigen Himmel-Hintergrund hinter der Roadmap. Optional später Lottie für aufwendige Figuren-Animationen.
 
 Barrierefreiheit: bei „Bewegung reduzieren" (`accessibilityReduceMotion`) einfache Überblendungen statt Flug-Animationen.
 
@@ -131,11 +127,10 @@ Barrierefreiheit: bei „Bewegung reduzieren" (`accessibilityReduceMotion`) einf
 ## 5. Technik & Architektur
 
 - **Plattform:** iOS 26+, iPhone & iPad (Hochformat, iPad auch Querformat); gebaut mit Xcode 26 / Swift 6
-- **Design:** Liquid Glass – Aktions-Buttons, PIN-Pad und Kinder-Leiste als Glas-Elemente (`glassEffect`, `GlassEffectContainer`), Tab-Bar und Sheets im System-Stil von iOS 26
+- **Design:** Liquid Glass – Aktions-Buttons und Kinder-Leiste als Glas-Elemente (`glassEffect`, `GlassEffectContainer`), Tab-Bar und Sheets im System-Stil von iOS 26
 - **Moderne APIs ohne Rücksicht auf ältere Versionen:** SwiftData mit `#Index` (schnelle Tagesabfragen), Swift Concurrency im strikten Swift-6-Modus
 - **UI:** SwiftUI
 - **Persistenz:** SwiftData, ausschließlich lokal auf einem Gerät (kein Sync, kein Server)
-- **PIN:** als Hash in der Keychain; Face ID / Touch ID über `LocalAuthentication`
 - **Architektur:** MVVM-light mit `@Observable`-ViewModels; Regel-Logik als reiner Service (`RuleEngine`)
 - **Keine Accounts, kein Tracking, keine Werbung** (Kinder-App → App-Store-Kategorie „Kids"-Anforderungen beachten)
 
@@ -180,15 +175,14 @@ RoteKarte/
 ├── Packages/RoteKarteCore/  RuleEngine, DayState, Rules, StatusText + Tests
 ├── App/                RoteKarteApp.swift, AppState
 ├── Models/             Child, CardEvent, EventType, Rules
-├── Services/           RuleEngine, DayProvider (Tageswechsel), ParentLock (PIN/Face ID), HapticsService, SoundService
+├── Services/           RuleEngine, DayProvider (Tageswechsel), HapticsService, SoundService
 ├── Features/
 │   ├── Today/          TodayView, RoadmapView, StationView, RewardGoalView, AvatarRunnerView
 │   ├── GiveCard/       GiveCardSheet
 │   ├── GoodDeed/       GoodDeedSheet
 │   ├── History/        CalendarView, DayDetailView
-│   ├── Settings/       SettingsView, ChildEditView, PinSetupView
-│   ├── Onboarding/     WelcomeView, PinSetupView, FirstChildView
-│   └── Lock/           PinPadView
+│   ├── Settings/       SettingsView, ChildEditView
+│   └── Onboarding/     WelcomeView, FirstChildView
 ├── Animations/         CardFlyAnimation, StrikeThroughShape, MeltEffect, SparkleEmitter
 ├── Resources/          Assets, Sounds (Pfeife, Glitzer, Plopp), Localizable (de/en)
 └── Tests/              RuleEngineTests, DayProviderTests, UI-Snapshot-Tests
@@ -208,10 +202,10 @@ RoteKarte/
 - Kartenflug, Durchstreichen, Schmelzen, Stern-Glitzer, Avatar-Figur
 - Haptik & Sounds, Reduce-Motion-Fallbacks
 
-### Phase 3 – Mehrere Kinder & Eltern-Modus
-- Onboarding (PIN festlegen, erstes Kind anlegen)
+### Phase 3 – Mehrere Kinder
+- Onboarding (erstes Kind anlegen)
 - Kinderprofile inkl. Belohnung pro Kind, Umschalten
-- PIN-Schutz für Aktionen und Einstellungen, Face ID, Auto-Sperre
+- Tag neu starten, alles löschen
 - Gründe (Vorschläge + Freitext), Rückgängig („Aus Versehen vergeben")
 
 ### Phase 4 – Verlauf & Motivation

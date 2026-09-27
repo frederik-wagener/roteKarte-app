@@ -36,6 +36,6 @@ Läuft auch unter Linux (z. B. im Docker-Image `swift:6.2`) und in der CI bei je
 
 - ✅ Phase 1 – Fundament: Datenmodell, Spielregeln mit Tests, einfacher Heute-Screen
 - ⏳ Phase 2 – Roadmap & Animationen
-- ⏳ Phase 3 – Mehrere Kinder & Eltern-Modus (PIN)
+- ⏳ Phase 3 – Mehrere Kinder
 - ⏳ Phase 4 – Verlauf & Motivation
 - ⏳ Phase 5 – Feinschliff & Release
