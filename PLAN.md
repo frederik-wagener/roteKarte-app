@@ -8,6 +8,7 @@ Eine iOS-App für Kinder (und Eltern), die das Verhalten des Tages mit gelben un
 |---|---|
 | Kann eine gute Tat das verlorene Eis zurückbringen? | **Nein.** Ist das Eis weg, bleibt es für den Tag weg. |
 | Wie viele Geräte? | **Ein Gerät**, alle Daten lokal. Kein iCloud-Sync. |
+| Mindest-iOS-Version? | **iOS 26** – volle Nutzung von Liquid Glass und aller aktuellen SwiftUI-APIs. |
 | Wer bedient die App? | **Das Kind schaut, die Eltern handeln mit PIN.** |
 | Nur Eis als Belohnung? | **Pro Kind wählbar** (Name + Emoji, Standard „Eis 🍦“). |
 
@@ -121,7 +122,7 @@ func evaluate(events: [CardEvent], rules: Rules) -> DayState
 | Belohnung erhalten am Abend | Idle-Animation: Belohnung wackelt leicht, Konfetti beim App-Öffnen, wenn der Vortag erfolgreich war. |
 | Tageswechsel | Weg wird „weggefegt" und neu gezeichnet. |
 
-Umsetzung: SwiftUI-Animationen (`withAnimation(.spring)`, `PhaseAnimator`, `KeyframeAnimator` ab iOS 17), `Canvas` für Partikel, `sensoryFeedback` für Haptik. Optional später Lottie für aufwendige Figuren-Animationen.
+Umsetzung: SwiftUI-Animationen (`withAnimation(.spring)`, `PhaseAnimator`, `KeyframeAnimator`), `Canvas` für Partikel, `sensoryFeedback` für Haptik, animierte SF Symbols (`symbolEffect`) für Schloss, Stern & Buttons, `MeshGradient` für einen lebendigen Himmel-Hintergrund hinter der Roadmap. Optional später Lottie für aufwendige Figuren-Animationen.
 
 Barrierefreiheit: bei „Bewegung reduzieren" (`accessibilityReduceMotion`) einfache Überblendungen statt Flug-Animationen.
 
@@ -129,7 +130,9 @@ Barrierefreiheit: bei „Bewegung reduzieren" (`accessibilityReduceMotion`) einf
 
 ## 5. Technik & Architektur
 
-- **Plattform:** iOS 17+, iPhone & iPad (Hochformat, iPad auch Querformat)
+- **Plattform:** iOS 26+, iPhone & iPad (Hochformat, iPad auch Querformat); gebaut mit Xcode 26 / Swift 6
+- **Design:** Liquid Glass – Aktions-Buttons, PIN-Pad und Kinder-Leiste als Glas-Elemente (`glassEffect`, `GlassEffectContainer`), Tab-Bar und Sheets im System-Stil von iOS 26
+- **Moderne APIs ohne Rücksicht auf ältere Versionen:** SwiftData mit `#Index` (schnelle Tagesabfragen), Swift Concurrency im strikten Swift-6-Modus
 - **UI:** SwiftUI
 - **Persistenz:** SwiftData, ausschließlich lokal auf einem Gerät (kein Sync, kein Server)
 - **PIN:** als Hash in der Keychain; Face ID / Touch ID über `LocalAuthentication`
